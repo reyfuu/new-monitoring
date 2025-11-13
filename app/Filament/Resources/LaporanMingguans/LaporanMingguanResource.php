@@ -30,7 +30,7 @@ class LaporanMingguanResource extends Resource
     protected static ?string $navigationLabel = 'Laporan Mingguan';
 
     // 🧩 Grup menu di sidebar
-    protected static string|\UnitEnum|null $navigationGroup = 'Laporan';
+   
 
 
     public static function form(Schema $schema): Schema

@@ -5,7 +5,7 @@ namespace App\Models;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 /**
  * @method bool hasRole(string|array|\Spatie\Permission\Contracts\Role ...$roles)
  * @method bool hasAnyRole(string|array|\Spatie\Permission\Contracts\Role ...$roles)

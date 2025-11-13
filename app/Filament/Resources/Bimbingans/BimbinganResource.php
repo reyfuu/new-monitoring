@@ -31,6 +31,7 @@ class BimbinganResource extends Resource
     protected static ?string $pluralModelLabel = 'Daftar Bimbingan';
     protected static ?string $navigationLabel = 'Bimbingan';
     // protected static ?string $navigationGroup = 'Akademik';
+     protected static string|\UnitEnum|null $navigationGroup = 'Laporan';
 
     public static function form(Schema $schema): Schema
     {
