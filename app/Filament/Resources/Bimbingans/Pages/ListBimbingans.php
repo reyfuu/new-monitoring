@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Bimbingans\Pages;
 use App\Filament\Resources\Bimbingans\BimbinganResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\EditAction;
 
 class ListBimbingans extends ListRecords
 {
@@ -12,6 +13,8 @@ class ListBimbingans extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+              EditAction::make()->visible(false),
+        ];
     }
 }

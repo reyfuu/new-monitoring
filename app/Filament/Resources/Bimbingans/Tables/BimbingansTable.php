@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Bimbingans\Tables;
 
+
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -12,6 +13,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\DeleteAction;
 
 class BimbingansTable
 {
@@ -213,12 +216,18 @@ class BimbingansTable
                     ]),
             ])
             ->actions([
-                EditAction::make(),
-            ])
+                EditAction::make()->visible(false),
+                
+        ])  
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->toolbarActions([
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
+                
             ])
             ->defaultSort('tanggal', 'desc') 
             ->deferLoading(); 

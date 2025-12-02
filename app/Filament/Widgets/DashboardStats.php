@@ -36,20 +36,18 @@ class DashboardStats extends BaseWidget
         // Hitung Laporan & Laporan Mingguan sesuai role
         if ($user->hasRole('mahasiswa')) {
             $totalLaporan = Laporan::where('mahasiswa_id', $user->id)->count();
-            $totalLaporanMingguan = LaporanMingguan::whereHas('laporan', fn($q) => $q->where('mahasiswa_id', $user->id))->count();
+            
         } elseif ($user->hasRole('dosen')) {
             $totalLaporan = Laporan::where('dosen_id', $user->id)->count();
-            $totalLaporanMingguan = LaporanMingguan::whereHas('laporan', fn($q) => $q->where('dosen_id', $user->id))->count();
+            
         } else {
             $totalLaporan = Laporan::count();
-            $totalLaporanMingguan = LaporanMingguan::count();
+        
         }
 
         $stats[] = Stat::make('Laporan', $totalLaporan)
             ->icon(IconsHeroicon::DocumentText);
 
-        $stats[] = Stat::make('Laporan Mingguan', $totalLaporanMingguan)
-            ->icon(IconsHeroicon::Calendar);
 
         return $stats;
     }

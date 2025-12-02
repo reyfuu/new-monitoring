@@ -68,12 +68,12 @@ class BimbinganResource extends Resource
             })
             ->actions([
                 EditAction::make()
-                    ->visible(function (Bimbingan $record) use ($user) {
-                        if ($user->hasRole('super_admin')) return true;
-                        if ($user->hasRole('dosen') && $record->dosen_id == $user->id) return true;
-                        if ($user->hasRole('mahasiswa') && $record->user_id == $user->id) return true;
-                        return false;
-                    }),
+                    ->visible(
+                        fn($record)=> ! in_array(
+                            strtolower(trim($record->status ?? '')),
+                            ['completed','disetujui']
+                        )
+                    ),
                 DeleteAction::make()
                     ->visible(function (Bimbingan $record) use ($user) {
                         if ($user->hasRole('super_admin')) return true;

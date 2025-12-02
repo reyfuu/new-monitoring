@@ -50,6 +50,7 @@ class LaporansTable
 
                 TextColumn::make('mahasiswa.name')
                     ->label('Mahasiswa')
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->searchable(),
 
                 TextColumn::make('dosen.name')

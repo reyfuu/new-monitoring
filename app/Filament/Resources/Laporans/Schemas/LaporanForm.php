@@ -24,18 +24,22 @@ class LaporanForm
                 TextInput::make('judul')
                     ->required()
                     ->maxLength(150)
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->label('Judul Laporan'),
 
                 DatePicker::make('tanggal_mulai')
                     ->required()
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->label('Tanggal Mulai'),
 
                 DatePicker::make('tanggal_berakhir')
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->label('Tanggal Berakhir'),
 
                 Textarea::make('deskripsi')
                     ->label('Deskripsi')
                     ->rows(3)
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->nullable(),
 
                 Select::make('type')
@@ -45,6 +49,7 @@ class LaporanForm
                         'magang' => 'Magang',
                         'skripsi' => 'Skripsi',
                     ])
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->required(),
 
                 Select::make('mahasiswa_id')
@@ -72,6 +77,7 @@ class LaporanForm
                         return [];
                     })
                     ->searchable()
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->preload(),
 
                 Select::make('dosen_id')
@@ -92,12 +98,14 @@ class LaporanForm
                         }
                         return null;
                     })
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->dehydrated(true), // ✅ agar tetap disimpan walau disabled
 
                 FileUpload::make('dokumen')
                     ->label('Upload Dokumen')
                     ->directory('laporan-dokumen')
                     ->preserveFilenames()
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->nullable(),
 
                 Select::make('status')

@@ -14,9 +14,14 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LaporanMingguan;
 use Filament\Forms\Components\Select;
+use Filament\Actions\EditAction;
+use Illuminate\Database\Eloquent\Builder;
 
-class LaporanMingguansTable
+
+class LaporanMingguansTable 
 {
+
+
     public static function configure(Table $table): Table
     {
         /** @var \App\Models\User $user */
@@ -25,43 +30,27 @@ class LaporanMingguansTable
         return $table
             ->recordUrl(null)
             ->groups([
-                Group::make('laporan.mahasiswa.name')
+                Group::make('mahasiswa.name')
                     ->label('Mahasiswa')
                     ->collapsible()
                     ->titlePrefixedWithLabel(false)
-                    ->getTitleFromRecordUsing(function ($record) {
-                        // Hitung jumlah minggu completed
-                        $totalMinggu = LaporanMingguan::whereHas('laporan', function ($q) use ($record) {
-                            $q->where('mahasiswa_id', $record->laporan->user_id);
-                        })
-                        ->where('status', 'completed')
-                        ->count();
-
-                        return $record->laporan->mahasiswa->name . " ({$totalMinggu} minggu)";
-                    }),
+                    
             ])
-            ->defaultGroup('laporan.mahasiswa.name')
-            ->groupsOnly(false)
+            ->defaultGroup('mahasiswa.name')
             ->groupingSettingsInDropdownOnDesktop()
+            ->groupsOnly(false)
             ->columns([
-                TextColumn::make('laporan.judul')
-                    ->label('Laporan Utama')
-                    ->sortable()
-                    ->searchable(),
 
-                TextColumn::make('week')
-                    ->label('Minggu Ke')
-                    ->sortable()
-                    ->getStateUsing(function ($record) {
-                        // Hitung urut minggu hanya dari yang status completed
-                        return LaporanMingguan::whereHas('laporan', function ($q) use ($record) {
-                            $q->where('mahasiswa_id', $record->laporan->mahasiswa_id);
-                        })
-                        ->where('status', 'completed')
-                        ->orderBy('created_at')
-                        ->pluck('id')
-                        ->search($record->id) + 1;
-                    }),
+           
+
+
+
+                TextColumn::make('topik')
+                    ->label('topik')
+                    ->searchable()
+                    ->wrap(),
+                    
+
 
                 TextColumn::make('isi')
                     ->label('Isi / Link')
@@ -124,6 +113,9 @@ class LaporanMingguansTable
                     ->visible(fn($record) => $user->hasRole('dosen'))
                     ->modalHeading(fn($record) => "Update Status: {$record->laporan->mahasiswa->name}")
                     ->modalSubmitActionLabel('Simpan'),
+            ])
+            ->actions([
+                EditAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

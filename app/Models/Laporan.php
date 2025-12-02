@@ -28,9 +28,4 @@ class Laporan extends Model
     {
         return $this->belongsTo(User::class, 'dosen_id')->whereHas('roles', fn ($q) => $q->where('name', 'dosen'));
     }
-
-    public function laporanMingguans()
-    {
-        return $this->hasMany(LaporanMingguan::class);
-    }
 }

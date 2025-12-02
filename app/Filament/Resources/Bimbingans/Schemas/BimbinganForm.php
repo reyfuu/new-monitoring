@@ -50,7 +50,7 @@ class BimbinganForm
                             ->preload()
                             ->required()
                             ->default($user->hasRole('mahasiswa') ? $user->id : null)
-                            ->disabled(fn() => $user->hasRole('mahasiswa') || $user->hasRole('dosen'))
+                            ->disabled(fn() => auth()->user()?->hasRole('mahasiswa') || auth()->user()->hasRole('dosen'))
                             ->visible(fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa']))
                             ->live()
                             ->afterStateUpdated(function ($state, $set) use ($user) {
@@ -90,6 +90,7 @@ class BimbinganForm
                             ->label('Topik Bimbingan')
                             ->maxLength(50)
                             ->required()
+                            ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                             ->placeholder('Topik bimbingan')
                             ->columnSpan(2),
 
@@ -99,10 +100,11 @@ class BimbinganForm
                             ->options([
                                 'proposal' => '📄 Proposal',
                                 'skripsi' => '🎓 Skripsi',
-                                'lainnya' => '📝 Lainnya',
+                                'lainnya' => '📝 Laporan Mingguan',
                             ])
                             ->required()
                             ->default('proposal')
+                            ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                             ->placeholder('Jenis bimbingan')
                             ->columnSpan(1),
 
@@ -110,6 +112,7 @@ class BimbinganForm
                             ->label('Tanggal Bimbingan')
                             ->displayFormat('d/m/Y')
                             ->required()
+                            ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                             ->default(now())
                             ->columnSpan(1),
 
@@ -119,16 +122,17 @@ class BimbinganForm
                             ->maxLength(255)
                             ->rows(3)
                             ->required()
+                            ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                             ->columnSpanFull(),
 
                         // -------------------- STATUS BIMBINGAN --------------------
                         Select::make('status')
                             ->label('Status Bimbingan')
                             ->options([
-                                'pending' => 'Pending - Menunggu persetujuan',
-                                'approved' => 'Approved - Disetujui',
-                                'rejected' => 'Rejected - Ditolak',
-                                'completed' => 'Completed - Selesai',
+                               'menunggu' => 'Menunggu persetujuan',
+                               'disetujui' => 'Disetujui',
+                               'ditolak' => 'Ditolak',
+                               'selesai' => 'Selesai',
                             ])
                             ->default('pending')
                             ->required()
