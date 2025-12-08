@@ -52,4 +52,24 @@ class LaporanMingguanResource extends Resource
             'edit' => EditLaporanMingguan::route('/{record}/edit'),
         ];
     }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if ($user->hasRole('mahasiswa')) {
+            return $query->whereHas('laporan', function ($q) use ($user) {
+                $q->where('mahasiswa_id', $user->id);
+            });
+        }
+
+        if ($user->hasRole('dosen')) {
+            return $query->whereHas('laporan', function ($q) use ($user) {
+                $q->where('dosen_id', $user->id);
+            });
+        }
+
+        return $query;
+    }
 }

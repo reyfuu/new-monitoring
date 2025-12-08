@@ -20,8 +20,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LaporanMingguansTable 
 {
-
-
     public static function configure(Table $table): Table
     {
         /** @var \App\Models\User $user */
@@ -29,28 +27,27 @@ class LaporanMingguansTable
 
         return $table
             ->recordUrl(null)
-            ->groups([
-                Group::make('mahasiswa.name')
+            ->groups($user->hasRole('mahasiswa') ? [] : [
+                Group::make('laporan.mahasiswa.name')
                     ->label('Mahasiswa')
                     ->collapsible()
-                    ->titlePrefixedWithLabel(false)
-                    
+                    ->titlePrefixedWithLabel(false),
             ])
-            ->defaultGroup('mahasiswa.name')
+            ->defaultGroup($user->hasRole('mahasiswa') ? null : 'laporan.mahasiswa.name')
             ->groupingSettingsInDropdownOnDesktop()
             ->groupsOnly(false)
             ->columns([
-
-           
-
-
-
-                TextColumn::make('topik')
-                    ->label('topik')
+                TextColumn::make('laporan.judul')
+                    ->label('Topik Laporan')
                     ->searchable()
+                    ->sortable()
                     ->wrap(),
-                    
 
+                TextColumn::make('week')
+                    ->label('Minggu Ke')
+                    ->sortable()
+                    ->badge()
+                    ->color('primary'),
 
                 TextColumn::make('isi')
                     ->label('Isi / Link')
@@ -75,8 +72,13 @@ class LaporanMingguansTable
                         'pending' => 'Pending',
                         'disetujui' => 'Disetujui',
                         'revisi' => 'Revisi',
-                        default => $state,
+                        default => $state ?? 'Pending',
                     }),
+
+                TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -111,7 +113,7 @@ class LaporanMingguansTable
                         $record->update($data);
                     })
                     ->visible(fn($record) => $user->hasRole('dosen'))
-                    ->modalHeading(fn($record) => "Update Status: {$record->laporan->mahasiswa->name}")
+                    ->modalHeading('Update Status Laporan')
                     ->modalSubmitActionLabel('Simpan'),
             ])
             ->actions([
@@ -122,7 +124,7 @@ class LaporanMingguansTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            // ->defaultSort('created_at', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->deferLoading();
     }
 }

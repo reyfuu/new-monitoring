@@ -32,6 +32,7 @@ class BimbingansTable
                     ->collapsible()
                     ->titlePrefixedWithLabel(false)
                     ->getTitleFromRecordUsing(function ($record) {
+                        // Hitung total bimbingan untuk mahasiswa ini
                         $totalPertemuan = \App\Models\Bimbingan::where('user_id', $record->user_id)
                             ->where('status', 'completed')
                             ->count();

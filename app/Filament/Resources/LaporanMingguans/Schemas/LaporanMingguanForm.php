@@ -7,7 +7,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -21,78 +20,58 @@ class LaporanMingguanForm
         // 🔍 Ambil query laporan sesuai role
         $laporanQuery = Laporan::query();
 
-        // Jika mahasiswa, hanya ambil laporan miliknya
         if ($user->hasRole('mahasiswa')) {
             $laporanQuery->where('mahasiswa_id', $user->id);
+        } elseif ($user->hasRole('dosen')) {
+            $laporanQuery->where('dosen_id', $user->id);
         }
 
-        // 🧱 Komponen form
+        // 🧱 Komponen form sesuai kolom migration
         $components = [
+            Select::make('laporan_id')
+                ->label('Laporan (Topik)')
+                ->options(function () use ($user) {
+                    $query = Laporan::query();
+                    
+                    if ($user->hasRole('mahasiswa')) {
+                        $query->where('mahasiswa_id', $user->id);
+                    } elseif ($user->hasRole('dosen')) {
+                        $query->where('dosen_id', $user->id);
+                    }
+                    
+                    return $query->get()->mapWithKeys(function ($laporan) {
+                        $judul = $laporan->judul ?: "Laporan #{$laporan->id}";
+                        return [$laporan->id => $judul];
+                    });
+                })
+                ->searchable()
+                ->preload()
+                ->required()
+                ->disabled(fn() => $user->hasRole('dosen')),
 
-            Select::make('mahasiswa_id')
-                    ->label('Mahasiswa')
-                    ->required()
-                    ->disabled(fn() => $user->hasRole('mahasiswa'))
-                    ->default(fn() => $user->hasRole('mahasiswa') ? $user->id : null)
-                    ->dehydrated(true) // ✅ WAJIB, agar tetap disimpan walau disabled
-                    ->options(function () use ($user) {
-                        if ($user->hasRole('mahasiswa')) {
-                            return \App\Models\User::where('id', $user->id)->pluck('name', 'id');
-                        }
-
-                        if ($user->hasRole('dosen')) {
-                            return \App\Models\User::where('dosen_pembimbing_id', $user->id)
-                                ->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'))
-                                ->pluck('name', 'id');
-                        }
-
-                        if ($user->hasRole('super_admin')) {
-                            return \App\Models\User::whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'))
-                                ->pluck('name', 'id');
-                        }
-
-                        return [];
-                    })
-                    ->searchable()
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->visible(false) 
-                    ->preload(),
-
-                Select::make('dosen_id')
-                    ->label('Dosen Pembimbing')
-                    ->relationship(
-                        name: 'dosen',
-                        titleAttribute: 'name',
-                        modifyQueryUsing: fn($query) =>
-                        $query->whereHas('roles', fn($q) => $q->where('name', 'dosen'))
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->disabled(fn() => $user->hasRole('mahasiswa'))
-                    ->default(function () use ($user) {
-                        if ($user->hasRole('mahasiswa') && $user->dosen_pembimbing_id) {
-                            return $user->dosen_pembimbing_id;
-                        }
-                        return null;
-                    })
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->visible(false)
-                    ->dehydrated(true), // ✅ agar tetap disimpan walau disabled
-            
+            Select::make('week')
+                ->label('Minggu Ke')
+                ->options([
+                    1 => 'Minggu 1',
+                    2 => 'Minggu 2',
+                    3 => 'Minggu 3',
+                    4 => 'Minggu 4',
+                ])
+                ->required()
+                ->disabled(fn() => $user->hasRole('dosen')),
 
             TextInput::make('isi')
                 ->label('Link Dokumen Laporan')
                 ->placeholder('Tempel link Google Docs / Drive di sini...')
-                ->url() // validasi otomatis untuk format URL
+                ->url()
                 ->required()
-                ->disabled(fn() => auth()->user()?->hasRole('dosen'))
+                ->disabled(fn() => $user->hasRole('dosen'))
                 ->suffixIcon('heroicon-o-link')
                 ->helperText('Masukkan link dokumen laporan mingguan (contoh: https://docs.google.com/...).'),
         ];
 
         // Jika user dosen atau super admin → tambahkan kolom status
-        if ($user->hasAnyRole(['dosen', 'super admin'])) {
+        if ($user->hasAnyRole(['dosen', 'super_admin'])) {
             $components[] = Select::make('status')
                 ->label('Status')
                 ->options([

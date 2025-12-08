@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Laporans\Schemas;
 
+use App\Models\Laporan;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -10,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Validation\Rules\Unique;
 
 
 class LaporanForm
@@ -44,13 +46,34 @@ class LaporanForm
 
                 Select::make('type')
                     ->label('Tipe Laporan')
-                    ->options([
-                        'proposal' => 'Proposal',
-                        'magang' => 'Magang',
-                        'skripsi' => 'Skripsi',
-                    ])
+                    ->options(function () use ($user) {
+                        $allTypes = [
+                            'proposal' => 'Proposal',
+                            'magang' => 'Magang',
+                            'skripsi' => 'Skripsi',
+                        ];
+                        
+                        // Filter tipe yang sudah ada laporan-nya (untuk mahasiswa)
+                        if ($user->hasRole('mahasiswa')) {
+                            $existingTypes = Laporan::where('mahasiswa_id', $user->id)
+                                ->pluck('type')
+                                ->toArray();
+                            
+                            return collect($allTypes)->filter(function ($label, $type) use ($existingTypes) {
+                                return !in_array($type, $existingTypes);
+                            })->toArray();
+                        }
+                        
+                        return $allTypes;
+                    })
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->required(),
+                    ->required()
+                    ->helperText(function () use ($user) {
+                        if ($user->hasRole('mahasiswa')) {
+                            return 'ℹ️ Setiap tipe hanya bisa dibuat satu kali';
+                        }
+                        return null;
+                    }),
 
                 Select::make('mahasiswa_id')
                     ->label('Mahasiswa')

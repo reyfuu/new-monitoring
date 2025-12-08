@@ -13,4 +13,16 @@ class CreateLaporanMingguan extends CreateRecord
 
     protected static ?string $breadcrumb = 'Buat';
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('mahasiswa')) {
+            $data['mahasiswa_id'] = $user->id;
+            $data['dosen_id'] = $user->dosen_pembimbing_id;
+            $data['status'] = 'pending';
+        }
+
+        return $data;
+    }
 }

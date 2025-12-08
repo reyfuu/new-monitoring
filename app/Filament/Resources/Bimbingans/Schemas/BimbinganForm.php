@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Bimbingans\Schemas;
 
 use App\Models\User;
+use App\Models\Laporan;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
@@ -33,24 +34,33 @@ class BimbinganForm
                         // -------------------- MAHASISWA --------------------
                         Select::make('user_id')
                             ->label('Mahasiswa')
-                            ->options(function () use ($user) {
-                                $query = User::query();
+                            ->options(function ($record) use ($user) {
+                                $query = User::query()
+                                    ->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'));
 
                                 if ($user->hasRole('mahasiswa')) {
                                     $query->where('id', $user->id);
                                 } elseif ($user->hasRole('dosen')) {
-                                    $query->where('dosen_pembimbing_id', $user->id);
-                                } elseif ($user->hasRole('super_admin')) {
-                                    $query->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'));
+                                    // Ambil mahasiswa yang punya bimbingan dengan dosen ini ATAU dosen_pembimbing_id = dosen ini
+                                    $query->where(function ($q) use ($user) {
+                                        $q->where('dosen_pembimbing_id', $user->id)
+                                          ->orWhereHas('bimbingans', fn($bq) => $bq->where('dosen_id', $user->id));
+                                    });
+                                }
+                                
+                                // Jika edit, pastikan current value ada di options
+                                if ($record && $record->user_id) {
+                                    $query->orWhere('id', $record->user_id);
                                 }
 
-                                return $query->pluck('name', 'id');
+                                return $query->distinct()->pluck('name', 'id');
                             })
                             ->searchable()
                             ->preload()
                             ->required()
                             ->default($user->hasRole('mahasiswa') ? $user->id : null)
                             ->disabled(fn() => auth()->user()?->hasRole('mahasiswa') || auth()->user()->hasRole('dosen'))
+                            ->dehydrated(true)
                             ->visible(fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa']))
                             ->live()
                             ->afterStateUpdated(function ($state, $set) use ($user) {
@@ -67,21 +77,51 @@ class BimbinganForm
                         Select::make('dosen_id')
                             ->label('Dosen Pembimbing')
                             ->options(function () use ($user) {
-                                $query = User::query();
-                                if ($user->hasRole('mahasiswa')) {
-                                    $query->where('id', $user->dosen_pembimbing_id);
-                                } elseif ($user->hasRole('dosen')) {
+                                $query = User::query()
+                                    ->whereHas('roles', fn($q) => $q->where('name', 'dosen'));
+                                
+                                if ($user->hasRole('dosen')) {
                                     $query->where('id', $user->id);
-                                } elseif ($user->hasRole('super_admin')) {
-                                    $query->whereHas('roles', fn($q) => $q->where('name', 'dosen'));
                                 }
+                                
                                 return $query->pluck('name', 'id');
                             })
                             ->searchable()
                             ->preload()
-                            ->nullable()
-                            ->default($user->hasRole('mahasiswa') ? $user->dosen_pembimbing_id : ($user->hasRole('dosen') ? $user->id : null))
+                            ->required()
+                            ->default(function () use ($user) {
+                                // Cek dari laporan proposal/skripsi/magang yang ada
+                                if ($user->hasRole('mahasiswa')) {
+                                    $laporan = Laporan::where('mahasiswa_id', $user->id)
+                                        ->whereNotNull('dosen_id')
+                                        ->first();
+                                    if ($laporan) {
+                                        return $laporan->dosen_id;
+                                    }
+                                    return $user->dosen_pembimbing_id;
+                                }
+                                if ($user->hasRole('dosen')) {
+                                    return $user->id;
+                                }
+                                return null;
+                            })
                             ->disabled(fn() => $user->hasRole('mahasiswa') || $user->hasRole('dosen'))
+                            ->helperText(function ($get) use ($user) {
+                                if ($user->hasRole('mahasiswa')) {
+                                    $type = $get('type');
+                                    if ($type) {
+                                        $laporan = Laporan::where('mahasiswa_id', $user->id)
+                                            ->where('type', $type)
+                                            ->first();
+                                        if ($laporan && $laporan->dosen_id) {
+                                            return '✅ Dosen diambil otomatis dari Laporan ' . ucfirst($type);
+                                        }
+                                    }
+                                    return 'ℹ️ Dosen akan otomatis terisi berdasarkan tipe laporan';
+                                }
+                                return null;
+                            })
+                            ->dehydrated(true)
                             ->visible(fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa']))
                             ->columnSpan(1),
 
@@ -97,15 +137,52 @@ class BimbinganForm
                         // -------------------- JENIS & TANGGAL BIMBINGAN --------------------
                         Select::make('type')
                             ->label('Jenis Bimbingan')
-                            ->options([
-                                'proposal' => '📄 Proposal',
-                                'skripsi' => '🎓 Skripsi',
-                                'lainnya' => '📝 Laporan Mingguan',
-                            ])
+                            ->options(function () use ($user) {
+                                $allTypes = [
+                                    'proposal' => '📄 Proposal',
+                                    'skripsi' => '🎓 Skripsi',
+                                    'magang' => '💼 Magang',
+                                ];
+                                
+                                // Untuk mahasiswa, hanya tampilkan tipe yang sudah ada laporan-nya
+                                if ($user->hasRole('mahasiswa')) {
+                                    $existingTypes = Laporan::where('mahasiswa_id', $user->id)
+                                        ->pluck('type')
+                                        ->toArray();
+                                    
+                                    return collect($allTypes)->filter(function ($label, $type) use ($existingTypes) {
+                                        return in_array($type, $existingTypes);
+                                    })->toArray();
+                                }
+                                
+                                return $allTypes;
+                            })
                             ->required()
-                            ->default('proposal')
                             ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                            ->placeholder('Jenis bimbingan')
+                            ->placeholder('Pilih jenis bimbingan')
+                            ->helperText(function () use ($user) {
+                                if ($user->hasRole('mahasiswa')) {
+                                    $count = Laporan::where('mahasiswa_id', $user->id)->count();
+                                    if ($count == 0) {
+                                        return '⚠️ Buat Laporan terlebih dahulu sebelum membuat Bimbingan';
+                                    }
+                                    return 'ℹ️ Hanya menampilkan tipe yang sudah ada Laporan-nya';
+                                }
+                                return null;
+                            })
+                            ->live()
+                            ->afterStateUpdated(function ($state, $set, $get) use ($user) {
+                                // Jika mahasiswa pilih type, ambil dosen dari laporan
+                                if ($user->hasRole('mahasiswa') && $state) {
+                                    $laporan = Laporan::where('mahasiswa_id', $user->id)
+                                        ->where('type', $state)
+                                        ->first();
+                                    
+                                    if ($laporan && $laporan->dosen_id) {
+                                        $set('dosen_id', $laporan->dosen_id);
+                                    }
+                                }
+                            })
                             ->columnSpan(1),
 
                         DatePicker::make('tanggal')

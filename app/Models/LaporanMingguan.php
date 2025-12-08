@@ -7,20 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class LaporanMingguan extends Model
 {
     protected $fillable = [
-        'mahasiswa_id',
-        'dosen_id',
+        'laporan_id',
+        'week',
         'isi',
         'status',
     ];
     
-    public function mahasiswa()
+    public function laporan()
     {
-        return $this->belongsTo(User::class, 'mahasiswa_id')->whereHas('roles', fn ($q) => $q->where('name', 'mahasiswa'));
+        return $this->belongsTo(Laporan::class, 'laporan_id');
     }
-
-    public function dosen()
-    {
-        return $this->belongsTo(User::class, 'dosen_id')->whereHas('roles', fn ($q) => $q->where('name', 'dosen'));
-    }
-
 }
