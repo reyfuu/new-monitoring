@@ -37,7 +37,11 @@ class Bimbingan extends Model
 
             if ($user && $user->hasRole('mahasiswa')) {
                 $bimbingan->user_id = $user->id;
-                $bimbingan->dosen_id = $user->dosen_pembimbing_id;
+                
+                // Only set dosen_id if not already provided by form (fallback)
+                if (empty($bimbingan->dosen_id)) {
+                    $bimbingan->dosen_id = $user->dosen_pembimbing_id;
+                }
             }
 
             // Auto hitung pertemuan ke berapa

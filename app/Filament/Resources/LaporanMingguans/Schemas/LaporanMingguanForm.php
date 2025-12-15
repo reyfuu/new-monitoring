@@ -49,16 +49,28 @@ class LaporanMingguanForm
                 ->required()
                 ->disabled(fn() => $user->hasRole('dosen')),
 
-            Select::make('week')
-                ->label('Minggu Ke')
-                ->options([
-                    1 => 'Minggu 1',
-                    2 => 'Minggu 2',
-                    3 => 'Minggu 3',
-                    4 => 'Minggu 4',
-                ])
+            TextInput::make('week')
+                ->label('Minggu Ke-')
+                ->numeric()
+                ->minValue(1)
+                ->maxValue(26)
+                ->extraInputAttributes(['min' => 1, 'max' => 26])
+                ->rules(['integer', 'min:1', 'max:26'])
+                ->live()
+                ->afterStateUpdated(function ($state, $set) {
+                    // Batasi nilai secara real-time saat user mengetik
+                    if ($state !== null && $state !== '') {
+                        if ($state > 26) {
+                            $set('week', 26);
+                        } elseif ($state < 1) {
+                            $set('week', 1);
+                        }
+                    }
+                })
+                ->placeholder('Masukkan nomor minggu (contoh: 1, 2, 3...)')
                 ->required()
-                ->disabled(fn() => $user->hasRole('dosen')),
+                ->disabled(fn() => $user->hasRole('dosen'))
+                ->helperText('Masukkan angka minggu ke berapa (1-26, maks. 6 bulan)'),
 
             TextInput::make('isi')
                 ->label('Link Dokumen Laporan')
