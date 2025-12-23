@@ -29,23 +29,30 @@ class RoleSeeder extends Seeder
             
             // Permissions untuk dosen
             $dosenPermissions = [
-                'View:Bimbingan', 'ViewAny:Bimbingan', 'Create:Bimbingan', 'Update:Bimbingan',
-                'View:Laporan', 'ViewAny:Laporan', 'Update:Laporan',
-                'View:LaporanMingguan', 'ViewAny:LaporanMingguan', 'Update:LaporanMingguan',
-                'View:Dashboard', 'View:DashboardStats',
+                'ViewAny:Bimbingan', 'View:Bimbingan', 'Create:Bimbingan', 'Update:Bimbingan',
+                'ViewAny:Laporan', 'View:Laporan', 'Update:Laporan',
+                'ViewAny:LaporanMingguan', 'View:LaporanMingguan', 'Update:LaporanMingguan',
+                'View:DosenDashboard',
             ];
             $dosen->syncPermissions($dosenPermissions);
             $this->command->info("Assigned permissions to dosen");
 
             // Permissions untuk mahasiswa
             $mahasiswaPermissions = [
-                'View:Bimbingan', 'ViewAny:Bimbingan', 'Create:Bimbingan', 'Update:Bimbingan', 'Delete:Bimbingan',
-                'View:Laporan', 'ViewAny:Laporan', 'Create:Laporan',
-                'View:LaporanMingguan', 'ViewAny:LaporanMingguan', 'Create:LaporanMingguan', 'Update:LaporanMingguan',
-                'View:Dashboard', 'View:DashboardStats',
+                'ViewAny:Bimbingan', 'View:Bimbingan', 'Create:Bimbingan', 'Update:Bimbingan', 'Delete:Bimbingan',
+                'ViewAny:Laporan', 'View:Laporan', 'Create:Laporan',
+                'ViewAny:LaporanMingguan', 'View:LaporanMingguan', 'Create:LaporanMingguan', 'Update:LaporanMingguan',
+                'View:MahasiswaDashboard',
             ];
             $mahasiswa->syncPermissions($mahasiswaPermissions);
             $this->command->info("Assigned permissions to mahasiswa");
+
+            // Permissions untuk ka_prodi - hanya dashboard
+            $kaprodiPermissions = [
+                'View:KaprodiDashboard',
+            ];
+            $kaprodi->syncPermissions($kaprodiPermissions);
+            $this->command->info("Assigned permissions to ka_prodi");
         } else {
             $this->command->error('No permissions found! Run shield:generate first.');
         }

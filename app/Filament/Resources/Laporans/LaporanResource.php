@@ -83,4 +83,16 @@ class LaporanResource extends Resource
             'edit' => EditLaporan::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyRole(['super_admin', 'dosen', 'mahasiswa']);
+    }
 }

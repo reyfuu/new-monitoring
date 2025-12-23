@@ -72,4 +72,16 @@ class LaporanMingguanResource extends Resource
 
         return $query;
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyRole(['super_admin', 'dosen', 'mahasiswa']);
+    }
 }
