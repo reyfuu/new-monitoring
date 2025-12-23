@@ -30,7 +30,12 @@ class Dashboard extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return true;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        
+        // Only super_admin sees the default Dashboard menu
+        // Other roles have their own custom dashboards
+        return $user && $user->hasRole('super_admin');
     }
 
     public function mount(): void
