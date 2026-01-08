@@ -146,6 +146,7 @@ class LaporanForm
 
                 FileUpload::make('dokumen')
                     ->label('Upload Dokumen')
+                    ->disk('public')
                     ->directory('laporan-dokumen')
                     ->preserveFilenames()
                     ->acceptedFileTypes(['application/pdf'])

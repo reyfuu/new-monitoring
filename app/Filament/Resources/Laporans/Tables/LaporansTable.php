@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Laporans\Tables;
 use App\Models\Laporan;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -62,6 +63,23 @@ class LaporansTable
                     ->label('Jenis')
                     ->sortable(),
 
+                TextColumn::make('dokumen')
+                    ->label('Dokumen')
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) {
+                            return '<span class="text-gray-400 italic">Belum upload</span>';
+                        }
+                        $url = asset('storage/' . $state);
+                        return "<a href='{$url}' target='_blank' class='inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium'>
+                                    <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z'></path>
+                                    </svg>
+                                    Lihat Dokumen
+                                </a>";
+                    })
+                    ->html()
+                    ->toggleable(),
+
                 TextColumn::make('status')
                     ->badge()
                     ->colors([
@@ -91,6 +109,13 @@ class LaporansTable
                     ->visible(fn() => $user->hasRole('mahasiswa')),
             ])
             ->recordActions([
+                Action::make('preview_dokumen')
+                    ->label('Preview')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(fn($record) => $record->dokumen ? asset('storage/' . $record->dokumen) : null)
+                    ->openUrlInNewTab()
+                    ->visible(fn($record) => !empty($record->dokumen)),
                 EditAction::make()
                     ->visible(fn($record) => $record->status !== 'disetujui'),
                 DeleteAction::make()
