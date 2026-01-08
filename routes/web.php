@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Response;
 
 
 Route::get('/', function () {
@@ -17,6 +18,17 @@ Route::get('/', function () {
 Route::get('/admin', function () {
     return redirect('/dashboard');
 });
+
+Route::get('/view-pdf/{filename)',function ($filename){
+    $path = "private/". $filename;
+
+    if(!Storage::disk('local')->exists($path)){
+        abort(404);
+    }
+
+    return Storage::disk('local')->response($path);
+
+})->name('pdf.view')->middleware('auth');
 
 
 

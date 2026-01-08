@@ -61,7 +61,29 @@ class LaporansTable
                 TextColumn::make('type')
                     ->label('Jenis')
                     ->sortable(),
-
+                TextColumn::make('dokumen')
+                    ->label('dokumen')
+                    ->formatStateUsing(function ($record, $state) {
+                        // 1. Ambil nama file dari kolom lain di database
+                        $namaFile = $record->file_pdf; 
+                    
+                        // 2. Jika kolom file_pdf tidak kosong, buat link-nya
+                        if ($namaFile) {
+                            $url = route('pdf.view', ['filename' => $namaFile]);
+                            return "
+                                <div class='flex flex-col'>
+                                    <span class='font-bold'>{$state}</span>
+                                    <a href='{$url}' target='_blank' class='text-xs text-primary-600 underline'>
+                                        Buka PDF: {$namaFile}
+                                    </a>
+                                </div>
+                            ";
+                        }
+                    
+                        return $state;
+                    })
+                    ->html()
+                    ->sortable(),
                 TextColumn::make('status')
                     ->badge()
                     ->colors([
