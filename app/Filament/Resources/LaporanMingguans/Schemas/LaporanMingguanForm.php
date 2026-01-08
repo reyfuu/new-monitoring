@@ -28,27 +28,6 @@ class LaporanMingguanForm
 
         // 🧱 Komponen form sesuai kolom migration
         $components = [
-            Select::make('laporan_id')
-                ->label('Laporan (Topik)')
-                ->options(function () use ($user) {
-                    $query = Laporan::query();
-                    
-                    if ($user->hasRole('mahasiswa')) {
-                        $query->where('mahasiswa_id', $user->id);
-                    } elseif ($user->hasRole('dosen')) {
-                        $query->where('dosen_id', $user->id);
-                    }
-                    
-                    return $query->get()->mapWithKeys(function ($laporan) {
-                        $judul = $laporan->judul ?: "Laporan #{$laporan->id}";
-                        return [$laporan->id => $judul];
-                    });
-                })
-                ->searchable()
-                ->preload()
-                ->required()
-                ->disabled(fn() => $user->hasRole('dosen')),
-
             TextInput::make('week')
                 ->label('Minggu Ke-')
                 ->numeric()

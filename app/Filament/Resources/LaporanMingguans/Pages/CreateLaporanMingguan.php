@@ -13,6 +13,18 @@ class CreateLaporanMingguan extends CreateRecord
 
     protected static ?string $breadcrumb = 'Buat';
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction(),
+        ];
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = auth()->user();

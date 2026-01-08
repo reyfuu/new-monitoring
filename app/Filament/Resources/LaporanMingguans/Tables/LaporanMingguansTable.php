@@ -18,7 +18,7 @@ use Filament\Actions\EditAction;
 use Illuminate\Database\Eloquent\Builder;
 
 
-class LaporanMingguansTable 
+class LaporanMingguansTable
 {
     public static function configure(Table $table): Table
     {
@@ -37,12 +37,6 @@ class LaporanMingguansTable
             ->groupingSettingsInDropdownOnDesktop()
             ->groupsOnly(false)
             ->columns([
-                TextColumn::make('laporan.judul')
-                    ->label('Topik Laporan')
-                    ->searchable()
-                    ->sortable()
-                    ->wrap(),
-
                 TextColumn::make('week')
                     ->label('Minggu Ke')
                     ->sortable()

@@ -100,6 +100,21 @@ class UserForm
                 })
                 ->nullable(),
 
+            // 📚 Kategori Mahasiswa
+            Select::make('kategori')
+                ->label('Kategori Mahasiswa')
+                ->options([
+                    'skripsi' => 'Skripsi',
+                    'magang' => 'Magang',
+                ])
+                ->visible(function ($get) {
+                    $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
+                    return in_array('mahasiswa', $roles);
+                })
+                ->placeholder('Pilih kategori mahasiswa')
+                ->helperText('Skripsi: Dashboard, Laporan, Bimbingan | Magang: Dashboard, Laporan Mingguan, Laporan')
+                ->nullable(),
+
             Select::make('dosen_pembimbing_id')
                 ->label('Dosen Pembimbing')
                 ->relationship(

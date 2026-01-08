@@ -93,6 +93,7 @@ class LaporanResource extends Resource
             return false;
         }
 
+        // Menu Laporan ditampilkan untuk semua role (tanpa filter kategori)
         return $user->hasAnyRole(['super_admin', 'dosen', 'mahasiswa']);
     }
 }

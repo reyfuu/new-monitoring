@@ -26,12 +26,18 @@ class RoleSeeder extends Seeder
         if ($allPermissions->count() > 0) {
             $superAdmin->syncPermissions($allPermissions);
             $this->command->info("Assigned {$allPermissions->count()} permissions to super_admin");
-            
+
             // Permissions untuk dosen
             $dosenPermissions = [
-                'ViewAny:Bimbingan', 'View:Bimbingan', 'Create:Bimbingan', 'Update:Bimbingan',
-                'ViewAny:Laporan', 'View:Laporan', 'Update:Laporan',
-                'ViewAny:LaporanMingguan', 'View:LaporanMingguan', 'Update:LaporanMingguan',
+                'ViewAny:Bimbingan',
+                'View:Bimbingan',
+                'Update:Bimbingan',
+                'ViewAny:Laporan',
+                'View:Laporan',
+                'Update:Laporan',
+                'ViewAny:LaporanMingguan',
+                'View:LaporanMingguan',
+                'Update:LaporanMingguan',
                 'View:DosenDashboard',
             ];
             $dosen->syncPermissions($dosenPermissions);
@@ -39,9 +45,20 @@ class RoleSeeder extends Seeder
 
             // Permissions untuk mahasiswa
             $mahasiswaPermissions = [
-                'ViewAny:Bimbingan', 'View:Bimbingan', 'Create:Bimbingan', 'Update:Bimbingan', 'Delete:Bimbingan',
-                'ViewAny:Laporan', 'View:Laporan', 'Create:Laporan',
-                'ViewAny:LaporanMingguan', 'View:LaporanMingguan', 'Create:LaporanMingguan', 'Update:LaporanMingguan',
+                'ViewAny:Bimbingan',
+                'View:Bimbingan',
+                'Create:Bimbingan',
+                'Update:Bimbingan',
+                'Delete:Bimbingan',
+                'ViewAny:Laporan',
+                'View:Laporan',
+                'Create:Laporan',
+                'Update:Laporan',
+                'Delete:Laporan',
+                'ViewAny:LaporanMingguan',
+                'View:LaporanMingguan',
+                'Create:LaporanMingguan',
+                'Update:LaporanMingguan',
                 'View:MahasiswaDashboard',
             ];
             $mahasiswa->syncPermissions($mahasiswaPermissions);
@@ -65,7 +82,7 @@ class RoleSeeder extends Seeder
                 'password' => Hash::make('admin123'),
             ]
         );
-        
+
         if ($adminUser) {
             $adminUser->syncRoles(['super_admin']);
             $this->command->info('Role super_admin assigned to admin@example.com');

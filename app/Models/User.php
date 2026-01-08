@@ -6,6 +6,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 /**
  * @method bool hasRole(string|array|\Spatie\Permission\Contracts\Role ...$roles)
  * @method bool hasAnyRole(string|array|\Spatie\Permission\Contracts\Role ...$roles)
@@ -18,10 +19,11 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'email', 
+        'email',
         'password',
         'status',
         'angkatan',
+        'kategori',
         'dosen_pembimbing_id',
         'npm',
         'nidn',
@@ -85,7 +87,7 @@ class User extends Authenticatable
         return $this->bimbingans()
             ->where(function ($query) {
                 $query->whereNull('status_domen')
-                      ->orWhere('status_domen', 'review');
+                    ->orWhere('status_domen', 'review');
             })
             ->count();
     }
@@ -93,7 +95,7 @@ class User extends Authenticatable
     // ✅ NEW: List status_domen yang dianggap "selesai/terverifikasi"
     public function getStatusDomenTerverifikasiAttribute()
     {
-        return ['fix', 'acc', 'selesai']; 
+        return ['fix', 'acc', 'selesai'];
     }
 
     public function laporanSebagaiMahasiswa()

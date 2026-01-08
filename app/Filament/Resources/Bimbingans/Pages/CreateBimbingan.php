@@ -14,6 +14,18 @@ class CreateBimbingan extends CreateRecord
 
     protected static ?string $breadcrumb = 'Buat';
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction(),
+        ];
+    }
+
     public static function canAccess(array $parameters = []): bool
     {
         /** @var \App\Models\User|null $user */

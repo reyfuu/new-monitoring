@@ -109,6 +109,16 @@ class BimbinganResource extends Resource
             return false;
         }
 
-        return $user->hasAnyRole(['super_admin', 'dosen', 'mahasiswa']);
+        // Super admin dan dosen selalu lihat menu Bimbingan
+        if ($user->hasAnyRole(['super_admin', 'dosen'])) {
+            return true;
+        }
+
+        // Mahasiswa hanya lihat jika kategorinya 'skripsi'
+        if ($user->hasRole('mahasiswa')) {
+            return $user->kategori === 'skripsi';
+        }
+
+        return false;
     }
 }

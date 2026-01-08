@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Laporans\Tables;
 use App\Models\Laporan;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -77,15 +78,17 @@ class LaporansTable
                 CreateAction::make()
                     ->label('Tambah Laporan Baru')
                     ->icon('heroicon-o-plus')
-                    ->visible(fn() => $user->hasRole('mahasiswa')), 
+                    ->visible(fn() => $user->hasRole('mahasiswa')),
             ])
             ->recordActions([
-                EditAction::make()
+                EditAction::make(),
+                DeleteAction::make()
+                    ->visible(fn() => $user->hasRole('mahasiswa') || $user->hasRole('super_admin')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn() => $user->hasRole('super_admin')),
+                        ->visible(fn() => $user->hasRole('mahasiswa') || $user->hasRole('super_admin')),
                 ]),
             ]);
     }

@@ -30,7 +30,7 @@ class LaporanMingguanResource extends Resource
     protected static ?string $navigationLabel = 'Laporan Mingguan';
 
     // 🧩 Grup menu di sidebar
-   
+
 
 
     public static function form(Schema $schema): Schema
@@ -82,6 +82,16 @@ class LaporanMingguanResource extends Resource
             return false;
         }
 
-        return $user->hasAnyRole(['super_admin', 'dosen', 'mahasiswa']);
+        // Super admin dan dosen selalu lihat menu Laporan Mingguan
+        if ($user->hasAnyRole(['super_admin', 'dosen'])) {
+            return true;
+        }
+
+        // Mahasiswa hanya lihat jika kategorinya 'magang'
+        if ($user->hasRole('mahasiswa')) {
+            return $user->kategori === 'magang';
+        }
+
+        return false;
     }
 }

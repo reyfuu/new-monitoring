@@ -13,6 +13,18 @@ class CreateLaporan extends CreateRecord
 
     protected static ?string $breadcrumb = 'Buat';
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction(),
+        ];
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Set tanggal_mulai ke hari ini jika belum ada
