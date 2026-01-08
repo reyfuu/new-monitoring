@@ -20,17 +20,29 @@
 
         .welcome-banner {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 1rem;
             color: #fff;
             margin-bottom: 1.5rem;
             box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
         }
 
+        @media (min-width: 768px) {
+            .welcome-banner {
+                padding: 1.5rem;
+            }
+        }
+
         .welcome-banner h2 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 0.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .welcome-banner h2 {
+                font-size: 1.5rem;
+            }
         }
 
         .welcome-banner p {
@@ -44,22 +56,30 @@
             margin-bottom: 1.5rem;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1400px) {
             .metrics-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
             .metrics-grid { grid-template-columns: 1fr; }
         }
 
         .metric-card {
             background: #fff;
-            padding: 1.5rem;
+            padding: 1.25rem;
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             border: 1px solid #e5e5e5;
             transition: all 0.3s ease;
             border-top: 4px solid var(--primary-500);
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .metric-card {
+                padding: 1.5rem;
+            }
         }
 
         .dark .metric-card {
@@ -77,14 +97,24 @@
         .metric-card.info { border-top-color: var(--info-500); }
 
         .metric-icon {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .metric-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
         }
 
         .metric-card .metric-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
@@ -110,11 +140,24 @@
         }
 
         .metric-value {
-            font-size: 2.5rem;
+            font-size: 1.75rem;
             font-weight: 800;
             line-height: 1;
             color: #171717;
             margin: 0.5rem 0;
+            word-break: break-word;
+        }
+
+        @media (min-width: 768px) {
+            .metric-value {
+                font-size: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .metric-value {
+                font-size: 2.5rem;
+            }
         }
 
         .dark .metric-value {
@@ -132,20 +175,30 @@
 
         .content-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1fr;
             gap: 1.5rem;
         }
 
-        @media (max-width: 1024px) {
-            .content-grid { grid-template-columns: 1fr; }
+        @media (min-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1.5fr 1fr;
+            }
         }
 
         .card {
             background: #fff;
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             border: 1px solid #e5e5e5;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .card {
+                padding: 1.5rem;
+            }
         }
 
         .dark .card {
@@ -268,34 +321,46 @@
         }
 
         .dosen-card {
-            padding: 1.5rem;
+            padding: 1rem;
             background: linear-gradient(135deg, #ede9fe 0%, #c4b5fd 100%);
             border-radius: 0.75rem;
-            text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .dark .dosen-card {
             background: linear-gradient(135deg, rgb(124 58 237 / 0.2), rgb(139 92 246 / 0.2));
         }
 
+        .dosen-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
         .dosen-avatar {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 0.75rem;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             color: #fff;
+            flex-shrink: 0;
+        }
+
+        .dosen-info {
+            flex: 1;
+            min-width: 0;
         }
 
         .dosen-name {
             font-weight: 700;
             color: #171717;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
         }
 
         .dark .dosen-name {
@@ -303,7 +368,7 @@
         }
 
         .dosen-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -484,12 +549,18 @@
                     </h3>
                 </div>
 
-                @if($dosenPembimbing)
-                    <div class="dosen-card">
-                        <div class="dosen-avatar">👨‍🏫</div>
-                        <div class="dosen-label">Dosen Pembimbing</div>
-                        <div class="dosen-name">{{ $dosenPembimbing->name }}</div>
-                    </div>
+                @if(!empty($dosenPembimbingList))
+                    @foreach($dosenPembimbingList as $item)
+                        <div class="dosen-card">
+                            <div class="dosen-card-header">
+                                <div class="dosen-avatar">{{ $item['icon'] }}</div>
+                                <div class="dosen-info">
+                                    <div class="dosen-name">{{ $item['dosen']->name }}</div>
+                                    <div class="dosen-label">{{ $item['type'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 @else
                     <p class="empty-text">Belum ada dosen pembimbing</p>
                 @endif
@@ -511,9 +582,6 @@
                     <div>
                         <span class="laporan-badge {{ $laporanSkripsi ? 'active' : 'inactive' }}">
                             📚 Skripsi {{ $laporanSkripsi ? '✓' : '' }}
-                        </span>
-                        <span class="laporan-badge {{ $laporanPkl ? 'active' : 'inactive' }}">
-                            💼 PKL {{ $laporanPkl ? '✓' : '' }}
                         </span>
                         <span class="laporan-badge {{ $laporanMagang ? 'active' : 'inactive' }}">
                             🏢 Magang {{ $laporanMagang ? '✓' : '' }}

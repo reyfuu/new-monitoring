@@ -72,10 +72,6 @@ class LaporansTable
                 TextColumn::make('tanggal_mulai')
                     ->label('Mulai')
                     ->date(),
-
-                TextColumn::make('tanggal_berakhir')
-                    ->label('Berakhir')
-                    ->date(),
             ])
             ->headerActions([
                 CreateAction::make()

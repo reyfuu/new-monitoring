@@ -14,7 +14,7 @@ class DosenDashboard extends Page
     protected static ?string $navigationLabel = 'Dashboard';
     protected static ?string $title = 'Dashboard Dosen';
     protected static ?string $slug = 'dosen-dashboard';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = -2;
 
     protected string $view = 'filament.pages.dosen-dashboard';
 
@@ -42,31 +42,31 @@ class DosenDashboard extends Page
 
         // Total Mahasiswa bimbingan
         $totalMahasiswa = $user->mahasiswaBimbingan()->count();
-        
+
         // Bimbingan stats dari mahasiswa bimbingan
         $bimbinganQuery = Bimbingan::where('dosen_id', $user->id)
             ->orWhereHas('mahasiswa', function ($q) use ($user) {
                 $q->where('dosen_pembimbing_id', $user->id);
             });
-        
+
         $totalBimbingan = (clone $bimbinganQuery)->count();
-        
+
         // Bimbingan perlu review (status_domen null atau 'review')
         $bimbinganReview = (clone $bimbinganQuery)
             ->where(function ($q) {
                 $q->whereNull('status_domen')
-                  ->orWhere('status_domen', 'review');
+                    ->orWhere('status_domen', 'review');
             })
             ->count();
-        
+
         // Bimbingan selesai
         $bimbinganSelesai = (clone $bimbinganQuery)
             ->whereIn('status_domen', ['fix', 'acc', 'selesai'])
             ->count();
-        
+
         // Laporan stats
         $totalLaporan = Laporan::where('dosen_id', $user->id)->count();
-        
+
         // Pie chart data - Status Bimbingan
         $statusBimbinganData = [
             'review' => Bimbingan::where('dosen_id', $user->id)
@@ -77,14 +77,14 @@ class DosenDashboard extends Page
             'acc' => Bimbingan::where('dosen_id', $user->id)->where('status_domen', 'acc')->count(),
             'selesai' => Bimbingan::where('dosen_id', $user->id)->where('status_domen', 'selesai')->count(),
         ];
-        
+
         // Pie chart data - Jenis Laporan
         $jenisLaporanData = [
             'skripsi' => Laporan::where('dosen_id', $user->id)->where('type', 'skripsi')->count(),
             'pkl' => Laporan::where('dosen_id', $user->id)->where('type', 'pkl')->count(),
             'magang' => Laporan::where('dosen_id', $user->id)->where('type', 'magang')->count(),
         ];
-        
+
         // Daftar mahasiswa bimbingan
         $mahasiswaList = $user->mahasiswaBimbingan()
             ->withCount('bimbingans')

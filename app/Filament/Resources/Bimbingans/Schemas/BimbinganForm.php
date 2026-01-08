@@ -28,7 +28,7 @@ class BimbinganForm
             ->components([
                 // ==================== SECTION INFORMASI BIMBINGAN ====================
                 Section::make('Informasi Bimbingan')
-                    ->columns(3) 
+                    ->columns(2)
                     ->schema([
 
                         // -------------------- MAHASISWA --------------------
@@ -44,10 +44,10 @@ class BimbinganForm
                                     // Ambil mahasiswa yang punya bimbingan dengan dosen ini ATAU dosen_pembimbing_id = dosen ini
                                     $query->where(function ($q) use ($user) {
                                         $q->where('dosen_pembimbing_id', $user->id)
-                                          ->orWhereHas('bimbingans', fn($bq) => $bq->where('dosen_id', $user->id));
+                                            ->orWhereHas('bimbingans', fn($bq) => $bq->where('dosen_id', $user->id));
                                     });
                                 }
-                                
+
                                 // Jika edit, pastikan current value ada di options
                                 if ($record && $record->user_id) {
                                     $query->orWhere('id', $record->user_id);
@@ -79,11 +79,11 @@ class BimbinganForm
                             ->options(function () use ($user) {
                                 $query = User::query()
                                     ->whereHas('roles', fn($q) => $q->where('name', 'dosen'));
-                                
+
                                 if ($user->hasRole('dosen')) {
                                     $query->where('id', $user->id);
                                 }
-                                
+
                                 return $query->pluck('name', 'id');
                             })
                             ->searchable()
@@ -125,15 +125,6 @@ class BimbinganForm
                             ->visible(fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa']))
                             ->columnSpan(1),
 
-                        // -------------------- TOPIK BIMBINGAN --------------------
-                        TextInput::make('topik')
-                            ->label('Topik Bimbingan')
-                            ->maxLength(50)
-                            ->required()
-                            ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                            ->placeholder('Topik bimbingan')
-                            ->columnSpan(2),
-
                         // -------------------- JENIS & TANGGAL BIMBINGAN --------------------
                         Select::make('type')
                             ->label('Jenis Bimbingan')
@@ -143,18 +134,18 @@ class BimbinganForm
                                     'skripsi' => '🎓 Skripsi',
                                     'magang' => '💼 Magang',
                                 ];
-                                
+
                                 // Untuk mahasiswa, hanya tampilkan tipe yang sudah ada laporan-nya
                                 if ($user->hasRole('mahasiswa')) {
                                     $existingTypes = Laporan::where('mahasiswa_id', $user->id)
                                         ->pluck('type')
                                         ->toArray();
-                                    
+
                                     return collect($allTypes)->filter(function ($label, $type) use ($existingTypes) {
                                         return in_array($type, $existingTypes);
                                     })->toArray();
                                 }
-                                
+
                                 return $allTypes;
                             })
                             ->required()
@@ -177,7 +168,7 @@ class BimbinganForm
                                     $laporan = Laporan::where('mahasiswa_id', $user->id)
                                         ->where('type', $state)
                                         ->first();
-                                    
+
                                     if ($laporan && $laporan->dosen_id) {
                                         $set('dosen_id', $laporan->dosen_id);
                                     }
@@ -193,6 +184,15 @@ class BimbinganForm
                             ->default(now())
                             ->columnSpan(1),
 
+                        // -------------------- TOPIK BIMBINGAN --------------------
+                        TextInput::make('topik')
+                            ->label('Topik Bimbingan')
+                            ->maxLength(50)
+                            ->required()
+                            ->disabled(fn() => auth()->user()?->hasRole('dosen'))
+                            ->placeholder('Topik bimbingan')
+                            ->columnSpanFull(),
+
                         // -------------------- ISI BIMBINGAN --------------------
                         Textarea::make('isi')
                             ->label('Isi/Rincian Bimbingan')
@@ -206,50 +206,19 @@ class BimbinganForm
                         Select::make('status')
                             ->label('Status Bimbingan')
                             ->options([
-                               'menunggu' => 'Menunggu persetujuan',
-                               'disetujui' => 'Disetujui',
-                               'ditolak' => 'Ditolak',
-                               'selesai' => 'Selesai',
+                                'menunggu' => 'Menunggu persetujuan',
+                                'disetujui' => 'Disetujui',
+                                'ditolak' => 'Ditolak',
+                                'selesai' => 'Selesai',
                             ])
                             ->default('pending')
                             ->required()
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
-                            ->columnSpan(1),
+                            ->columnSpanFull(),
 
                         Hidden::make('status')
                             ->default('pending')
                             ->visible($user->hasRole('mahasiswa')),
-
-                        // -------------------- STATUS PROSES --------------------
-                        Select::make('status_domen')
-                            ->label('Status Proses')
-                            ->options([
-                                'revisi' => '🔄 Butuh Revisi',
-                                'review' => '👀 Dalam Review',
-                                'fix' => '✅ Sudah Fix',
-                                'acc' => '🎉 Diterima (ACC)',
-                                'tolak' => '❌ Ditolak',
-                                'selesai' => '🏁 Selesai',
-                            ])
-                            ->default('review')
-                            ->placeholder('Pilih status proses bimbingan')
-                            ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
-                            ->columnSpan(1),
-
-                        TextInput::make('status_domen')
-                            ->label('Status Proses')
-                            ->formatStateUsing(fn($state) => match ($state) {
-                                'revisi' => '🔄 Butuh Revisi',
-                                'review' => '👀 Dalam Review',
-                                'fix' => '✅ Sudah Fix',
-                                'acc' => '🎉 Diterima (ACC)',
-                                'tolak' => '❌ Ditolak',
-                                'selesai' => '🏁 Selesai',
-                                default => 'Belum ada status',
-                            })
-                            ->disabled()
-                            ->visible(fn($get) => $user->hasRole('mahasiswa') && !empty($get('status_domen')))
-                            ->columnSpan(1),
 
                         // -------------------- KOMENTAR --------------------
                         Textarea::make('komentar')

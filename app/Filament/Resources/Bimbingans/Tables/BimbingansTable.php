@@ -174,7 +174,7 @@ class BimbingansTable
             ->headerActions([
                 CreateAction::make()
                     ->label('Buat Bimbingan Baru')
-                    ->icon('heroicon-o-plus') 
+                    ->icon('heroicon-o-plus')
             ])
             ->filters([
                 // Filter Status - Admin
@@ -218,8 +218,8 @@ class BimbingansTable
             ])
             ->actions([
                 EditAction::make()->visible(false),
-                
-        ])  
+
+            ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
@@ -228,9 +228,9 @@ class BimbingansTable
             ->toolbarActions([
                 ForceDeleteBulkAction::make(),
                 DeleteBulkAction::make(),
-                
+
             ])
-            ->defaultSort('tanggal', 'desc') 
-            ->deferLoading(); 
+            ->defaultSort('tanggal', 'asc')
+            ->deferLoading();
     }
 }

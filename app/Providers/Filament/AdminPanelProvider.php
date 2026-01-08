@@ -28,8 +28,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('')
-            ->homeUrl(fn () => auth()->check() && auth()->user()->hasRole('ka_prodi') ? '/kaprodi-dashboard' : '/dashboard')
+            ->homeUrl(fn() => auth()->check() && auth()->user()->hasRole('ka_prodi') ? '/kaprodi-dashboard' : '/dashboard')
             ->login()
+            ->favicon(asset('images/logo.png'))
             ->sidebarWidth('15rem')
             ->globalSearch(false)
             ->colors([

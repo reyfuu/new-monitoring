@@ -13,7 +13,7 @@ class KaprodiDashboard extends Page
     protected static ?string $navigationLabel = 'Dashboard Kaprodi';
     protected static ?string $title = 'Dashboard Kaprodi';
     protected static ?string $slug = 'kaprodi-dashboard';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = -2;
 
     protected string $view = 'filament.pages.kaprodi-dashboard';
 
@@ -38,40 +38,40 @@ class KaprodiDashboard extends Page
     {
         // Total Mahasiswa
         $totalMahasiswa = User::role('mahasiswa')->count();
-        
+
         // Total Dosen
         $totalDosen = User::role('dosen')->count();
-        
+
         // Bimbingan stats
         $totalBimbingan = Bimbingan::where('status', 'completed')->count();
         $bimbinganSelesai = Bimbingan::whereIn('status_domen', ['fix', 'acc', 'selesai'])->count();
         $bimbinganReview = Bimbingan::where('status_domen', 'review')->orWhereNull('status_domen')->count();
-        
+
         // Mahasiswa On Track (punya bimbingan dengan status selesai)
         $mahasiswaOnTrack = User::role('mahasiswa')
             ->whereHas('bimbingans', function ($q) {
                 $q->whereIn('status_domen', ['fix', 'acc', 'selesai']);
             })->count();
-        
+
         // Mahasiswa At Risk (punya bimbingan tapi belum ada yang selesai)
         $mahasiswaAtRisk = User::role('mahasiswa')
             ->whereHas('bimbingans')
             ->whereDoesntHave('bimbingans', function ($q) {
                 $q->whereIn('status_domen', ['fix', 'acc', 'selesai']);
             })->count();
-        
-        // Mahasiswa Overdue (tidak punya bimbingan sama sekali)
+
+        // Mahasiswa Overdue (tidak punya bimbingan sama sekali / belum ada bimbingan)
         $mahasiswaOverdue = User::role('mahasiswa')
             ->whereDoesntHave('bimbingans')
             ->count();
-        
+
         // Dosen workload
         $dosenList = User::role('dosen')
             ->withCount('mahasiswaBimbingan')
             ->orderByDesc('mahasiswa_bimbingan_count')
             ->take(5)
             ->get();
-        
+
         // Calculate percentages
         $onTrackPercent = $totalMahasiswa > 0 ? round(($mahasiswaOnTrack / $totalMahasiswa) * 100) : 0;
         $atRiskPercent = $totalMahasiswa > 0 ? round(($mahasiswaAtRisk / $totalMahasiswa) * 100) : 0;

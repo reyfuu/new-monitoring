@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Bimbingans\Pages;
 
 use App\Filament\Resources\Bimbingans\BimbinganResource;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
 
 class CreateBimbingan extends CreateRecord
 {
@@ -12,4 +13,17 @@ class CreateBimbingan extends CreateRecord
     protected static ?string $title = 'Buat Bimbingan';
 
     protected static ?string $breadcrumb = 'Buat';
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        if (! $user) {
+            return false;
+        }
+
+        // Hanya mahasiswa dan super_admin yang bisa membuat bimbingan
+        return $user->hasRole('mahasiswa') || $user->hasRole('super_admin');
+    }
 }

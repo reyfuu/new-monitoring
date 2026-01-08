@@ -20,17 +20,29 @@
 
         .welcome-banner {
             background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 1rem;
             color: #fff;
             margin-bottom: 1.5rem;
             box-shadow: 0 20px 40px rgba(220, 38, 38, 0.3);
         }
 
+        @media (min-width: 768px) {
+            .welcome-banner {
+                padding: 1.5rem;
+            }
+        }
+
         .welcome-banner h2 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 0.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .welcome-banner h2 {
+                font-size: 1.5rem;
+            }
         }
 
         .welcome-banner p {
@@ -44,22 +56,30 @@
             margin-bottom: 1.5rem;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1400px) {
             .metrics-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
             .metrics-grid { grid-template-columns: 1fr; }
         }
 
         .metric-card {
             background: #fff;
-            padding: 1.5rem;
+            padding: 1.25rem;
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             border: 1px solid #e5e5e5;
             transition: all 0.3s ease;
             border-top: 4px solid var(--primary-500);
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .metric-card {
+                padding: 1.5rem;
+            }
         }
 
         .dark .metric-card {
@@ -77,14 +97,24 @@
         .metric-card.danger { border-top-color: var(--danger-500); }
 
         .metric-icon {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .metric-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
         }
 
         .metric-card .metric-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
@@ -110,11 +140,24 @@
         }
 
         .metric-value {
-            font-size: 2.5rem;
+            font-size: 1.75rem;
             font-weight: 800;
             line-height: 1;
             color: #171717;
             margin: 0.5rem 0;
+            word-break: break-word;
+        }
+
+        @media (min-width: 768px) {
+            .metric-value {
+                font-size: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .metric-value {
+                font-size: 2.5rem;
+            }
         }
 
         .dark .metric-value {
@@ -132,20 +175,30 @@
 
         .content-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1fr;
             gap: 1.5rem;
         }
 
-        @media (max-width: 1024px) {
-            .content-grid { grid-template-columns: 1fr; }
+        @media (min-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1.5fr 1fr;
+            }
         }
 
         .card {
             background: #fff;
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             border: 1px solid #e5e5e5;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .card {
+                padding: 1.5rem;
+            }
         }
 
         .dark .card {
@@ -260,8 +313,15 @@
 
         .dosen-stats {
             display: flex;
-            gap: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
             font-size: 0.875rem;
+        }
+
+        @media (min-width: 768px) {
+            .dosen-stats {
+                gap: 1.5rem;
+            }
         }
 
         .dosen-stat-label {

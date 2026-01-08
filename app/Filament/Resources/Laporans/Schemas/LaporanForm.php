@@ -32,10 +32,14 @@ class LaporanForm
                 DatePicker::make('tanggal_mulai')
                     ->required()
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
+                    ->default(now())
+                    ->dehydrated(true)
+                    ->visible(fn($operation) => $operation === 'edit' && !auth()->user()?->hasRole('dosen'))
                     ->label('Tanggal Mulai'),
 
                 DatePicker::make('tanggal_berakhir')
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
+                    ->visible(fn($operation) => $operation === 'edit' && !auth()->user()?->hasRole('dosen'))
                     ->label('Tanggal Berakhir'),
 
                 Textarea::make('deskripsi')
@@ -52,18 +56,18 @@ class LaporanForm
                             'magang' => 'Magang',
                             'skripsi' => 'Skripsi',
                         ];
-                        
+
                         // Filter tipe yang sudah ada laporan-nya (untuk mahasiswa)
                         if ($user->hasRole('mahasiswa')) {
                             $existingTypes = Laporan::where('mahasiswa_id', $user->id)
                                 ->pluck('type')
                                 ->toArray();
-                            
+
                             return collect($allTypes)->filter(function ($label, $type) use ($existingTypes) {
                                 return !in_array($type, $existingTypes);
                             })->toArray();
                         }
-                        
+
                         return $allTypes;
                     })
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
@@ -81,15 +85,22 @@ class LaporanForm
                     ->disabled(fn() => $user->hasRole('mahasiswa'))
                     ->default(fn() => $user->hasRole('mahasiswa') ? $user->id : null)
                     ->dehydrated(true) // ✅ WAJIB, agar tetap disimpan walau disabled
-                    ->options(function () use ($user) {
+                    ->options(function ($record) use ($user) {
                         if ($user->hasRole('mahasiswa')) {
                             return \App\Models\User::where('id', $user->id)->pluck('name', 'id');
                         }
 
                         if ($user->hasRole('dosen')) {
-                            return \App\Models\User::where('dosen_pembimbing_id', $user->id)
+                            $query = \App\Models\User::query()
                                 ->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'))
-                                ->pluck('name', 'id');
+                                ->where('dosen_pembimbing_id', $user->id);
+
+                            // Jika edit dan ada record, pastikan mahasiswa record ini ada di options
+                            if ($record && $record->mahasiswa_id) {
+                                $query->orWhere('id', $record->mahasiswa_id);
+                            }
+
+                            return $query->pluck('name', 'id');
                         }
 
                         if ($user->hasRole('super_admin')) {
@@ -128,6 +139,9 @@ class LaporanForm
                     ->label('Upload Dokumen')
                     ->directory('laporan-dokumen')
                     ->preserveFilenames()
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(10240) // 10MB
+                    ->helperText('Format: PDF, Maksimal 10MB')
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->nullable(),
 
@@ -153,8 +167,8 @@ class LaporanForm
                         'selesai' => '🏁 Selesai',
                     ])
                     ->default('review')
-                    ->placeholder('Pilih status proses bimbingan')
-                    ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
+                    ->placeholder('Pilih status proses')
+                    ->visible($user->hasRole('super_admin'))
                     ->columnSpan(1),
             ]);
     }

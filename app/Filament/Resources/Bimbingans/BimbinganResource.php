@@ -31,7 +31,7 @@ class BimbinganResource extends Resource
     protected static ?string $pluralModelLabel = 'Daftar Bimbingan';
     protected static ?string $navigationLabel = 'Bimbingan';
     // protected static ?string $navigationGroup = 'Akademik';
-     protected static string|\UnitEnum|null $navigationGroup = 'Laporan';
+    protected static string|\UnitEnum|null $navigationGroup = 'Laporan';
 
     public static function form(Schema $schema): Schema
     {
@@ -69,9 +69,9 @@ class BimbinganResource extends Resource
             ->actions([
                 EditAction::make()
                     ->visible(
-                        fn($record)=> ! in_array(
+                        fn($record) => ! in_array(
                             strtolower(trim($record->status ?? '')),
-                            ['completed','disetujui']
+                            ['completed', 'disetujui']
                         )
                     ),
                 DeleteAction::make()
@@ -85,6 +85,19 @@ class BimbinganResource extends Resource
                 DeleteBulkAction::make()
                     ->visible($user->hasRole('super_admin')),
             ]);
+    }
+
+    public static function canCreate(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        if (! $user) {
+            return false;
+        }
+
+        // Hanya mahasiswa dan super_admin yang bisa membuat bimbingan
+        return $user->hasRole('mahasiswa') || $user->hasRole('super_admin');
     }
 
     public static function shouldRegisterNavigation(): bool
