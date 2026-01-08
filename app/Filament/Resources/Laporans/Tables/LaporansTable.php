@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Laporans\Tables;
 use App\Models\Laporan;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -61,29 +62,7 @@ class LaporansTable
                 TextColumn::make('type')
                     ->label('Jenis')
                     ->sortable(),
-                TextColumn::make('dokumen')
-                    ->label('dokumen')
-                    ->formatStateUsing(function ($record, $state) {
-                        // 1. Ambil nama file dari kolom lain di database
-                        $namaFile = $record->file_pdf; 
-                    
-                        // 2. Jika kolom file_pdf tidak kosong, buat link-nya
-                        if ($namaFile) {
-                            $url = route('pdf.view', ['filename' => $namaFile]);
-                            return "
-                                <div class='flex flex-col'>
-                                    <span class='font-bold'>{$state}</span>
-                                    <a href='{$url}' target='_blank' class='text-xs text-primary-600 underline'>
-                                        Buka PDF: {$namaFile}
-                                    </a>
-                                </div>
-                            ";
-                        }
-                    
-                        return $state;
-                    })
-                    ->html()
-                    ->sortable(),
+
                 TextColumn::make('status')
                     ->badge()
                     ->colors([
@@ -113,6 +92,13 @@ class LaporansTable
                     ->visible(fn() => $user->hasRole('mahasiswa')),
             ])
             ->recordActions([
+                Action::make('preview_dokumen')
+                    ->label('Preview')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(fn($record) => $record->dokumen ? asset('storage/' . $record->dokumen) : null)
+                    ->openUrlInNewTab()
+                    ->visible(fn($record) => !empty($record->dokumen)),
                 EditAction::make()
                     ->visible(fn($record) => $record->status !== 'disetujui'),
                 DeleteAction::make()

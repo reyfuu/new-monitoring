@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Laporans\Pages;
 use App\Filament\Resources\Laporans\LaporanResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Storage;
 
 class EditLaporan extends EditRecord
 {
@@ -24,5 +25,18 @@ class EditLaporan extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Check if a new dokumen is being uploaded
+        if (isset($data['dokumen']) && $data['dokumen'] !== $this->record->dokumen) {
+            // Delete old dokumen file if it exists
+            if ($this->record->dokumen && Storage::disk('public')->exists($this->record->dokumen)) {
+                Storage::disk('public')->delete($this->record->dokumen);
+            }
+        }
+
+        return $data;
     }
 }
