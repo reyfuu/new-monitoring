@@ -76,11 +76,11 @@ class LaporansTable
 
                 TextColumn::make('komentar')
                     ->label('Komentar')
-                    ->limit(40)
+                    ->limit(4)
                     ->placeholder('Belum ada komentar')
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
-                        return strlen($state) > 40 ? $state : null;
+                        return strlen($state) > 4 ? $state : null;
                     })
                     ->toggleable(),
             ])
