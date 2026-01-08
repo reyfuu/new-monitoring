@@ -80,7 +80,7 @@ class LaporansTable
                     ->placeholder('Belum ada komentar')
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
-                        return strlen($state) > 4 ? $state : null;
+                        return strlen($state) > 15 ? $state : null;
                     })
                     ->toggleable(),
             ])
