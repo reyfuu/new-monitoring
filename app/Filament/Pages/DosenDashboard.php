@@ -51,43 +51,53 @@ class DosenDashboard extends Page
 
         $totalBimbingan = (clone $bimbinganQuery)->count();
 
-        // Bimbingan perlu review (status_domen null atau 'review')
+        // Bimbingan perlu review (status = pending)
         $bimbinganReview = (clone $bimbinganQuery)
-            ->where(function ($q) {
-                $q->whereNull('status_domen')
-                    ->orWhere('status_domen', 'review');
-            })
+            ->where('status', 'pending')
             ->count();
 
-        // Bimbingan selesai
+        // Bimbingan selesai (status = disetujui)
         $bimbinganSelesai = (clone $bimbinganQuery)
-            ->whereIn('status_domen', ['fix', 'acc', 'selesai'])
+            ->where('status', 'disetujui')
             ->count();
 
         // Laporan stats
         $totalLaporan = Laporan::where('dosen_id', $user->id)->count();
 
-        // Pie chart data - Status Bimbingan
+        // Pie chart data - Status Bimbingan (dari field 'status')
         $statusBimbinganData = [
-            'review' => Bimbingan::where('dosen_id', $user->id)
-                ->where(function ($q) {
-                    $q->whereNull('status_domen')->orWhere('status_domen', 'review');
-                })->count(),
-            'fix' => Bimbingan::where('dosen_id', $user->id)->where('status_domen', 'fix')->count(),
-            'acc' => Bimbingan::where('dosen_id', $user->id)->where('status_domen', 'acc')->count(),
-            'selesai' => Bimbingan::where('dosen_id', $user->id)->where('status_domen', 'selesai')->count(),
+            'review' => Bimbingan::where('dosen_id', $user->id)->where('status', 'pending')->count(),
+            'ditolak' => Bimbingan::where('dosen_id', $user->id)->where('status', 'ditolak')->count(),
+            'disetujui' => Bimbingan::where('dosen_id', $user->id)->where('status', 'disetujui')->count(),
         ];
 
-        // Pie chart data - Jenis Laporan
+        // Pie chart data - Jenis Laporan (proposal, magang, skripsi)
         $jenisLaporanData = [
-            'skripsi' => Laporan::where('dosen_id', $user->id)->where('type', 'skripsi')->count(),
-            'pkl' => Laporan::where('dosen_id', $user->id)->where('type', 'pkl')->count(),
+            'proposal' => Laporan::where('dosen_id', $user->id)->where('type', 'proposal')->count(),
             'magang' => Laporan::where('dosen_id', $user->id)->where('type', 'magang')->count(),
+            'skripsi' => Laporan::where('dosen_id', $user->id)->where('type', 'skripsi')->count(),
         ];
 
-        // Daftar mahasiswa bimbingan
-        $mahasiswaList = $user->mahasiswaBimbingan()
-            ->withCount('bimbingans')
+        // Daftar mahasiswa bimbingan (gabungan dari dosen_pembimbing_id dan laporan)
+        $mahasiswaIds = collect();
+
+        // 1. Dari relasi dosen_pembimbing_id
+        $mahasiswaFromRelation = User::role('mahasiswa')
+            ->where('dosen_pembimbing_id', $user->id)
+            ->pluck('id');
+        $mahasiswaIds = $mahasiswaIds->merge($mahasiswaFromRelation);
+
+        // 2. Dari laporan yang dosen_id = user ini
+        $mahasiswaFromLaporan = Laporan::where('dosen_id', $user->id)
+            ->pluck('mahasiswa_id');
+        $mahasiswaIds = $mahasiswaIds->merge($mahasiswaFromLaporan);
+
+        // Ambil unique mahasiswa dengan count bimbingan
+        $mahasiswaList = User::role('mahasiswa')
+            ->whereIn('id', $mahasiswaIds->unique())
+            ->withCount(['bimbingans' => function ($q) use ($user) {
+                $q->where('dosen_id', $user->id);
+            }])
             ->orderByDesc('bimbingans_count')
             ->take(5)
             ->get();

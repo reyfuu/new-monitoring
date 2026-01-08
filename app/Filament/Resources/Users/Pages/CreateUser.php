@@ -12,4 +12,9 @@ class CreateUser extends CreateRecord
     protected static ?string $title = 'Buat User Baru';
 
     protected static ?string $breadcrumb = 'Buat';
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

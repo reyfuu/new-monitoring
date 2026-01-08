@@ -50,22 +50,22 @@ class AdminDashboard extends Page
         // Total Kaprodi
         $totalKaprodi = User::role('ka_prodi')->count();
 
-        // Bimbingan stats
+        // Bimbingan stats (dari field 'status')
         $totalBimbingan = Bimbingan::count();
-        $bimbinganSelesai = Bimbingan::whereIn('status_domen', ['fix', 'acc', 'selesai'])->count();
-        $bimbinganReview = Bimbingan::where('status_domen', 'review')->orWhereNull('status_domen')->count();
+        $bimbinganSelesai = Bimbingan::where('status', 'disetujui')->count();
+        $bimbinganReview = Bimbingan::where('status', 'pending')->count();
 
-        // Mahasiswa On Track (punya bimbingan dengan status selesai)
+        // Mahasiswa On Track (punya bimbingan dengan status disetujui)
         $mahasiswaOnTrack = User::role('mahasiswa')
             ->whereHas('bimbingans', function ($q) {
-                $q->whereIn('status_domen', ['fix', 'acc', 'selesai']);
+                $q->where('status', 'disetujui');
             })->count();
 
-        // Mahasiswa At Risk (punya bimbingan tapi belum ada yang selesai)
+        // Mahasiswa At Risk (punya bimbingan tapi belum ada yang disetujui)
         $mahasiswaAtRisk = User::role('mahasiswa')
             ->whereHas('bimbingans')
             ->whereDoesntHave('bimbingans', function ($q) {
-                $q->whereIn('status_domen', ['fix', 'acc', 'selesai']);
+                $q->where('status', 'disetujui');
             })->count();
 
         // Mahasiswa Overdue (tidak punya bimbingan sama sekali)
@@ -76,17 +76,30 @@ class AdminDashboard extends Page
         // Total Laporan
         $totalLaporan = Laporan::count();
 
-        // Laporan by type
-        $laporanSkripsi = Laporan::where('type', 'skripsi')->count();
-        $laporanPkl = Laporan::where('type', 'pkl')->count();
+        // Laporan by type (proposal, magang, skripsi)
+        $laporanProposal = Laporan::where('type', 'proposal')->count();
         $laporanMagang = Laporan::where('type', 'magang')->count();
+        $laporanSkripsi = Laporan::where('type', 'skripsi')->count();
 
-        // Dosen workload list
-        $dosenList = User::role('dosen')
-            ->withCount('mahasiswaBimbingan')
-            ->orderByDesc('mahasiswa_bimbingan_count')
-            ->take(5)
-            ->get();
+        // Dosen workload list dengan perhitungan mahasiswa dari gabungan dosen_pembimbing_id dan laporan
+        $dosenList = User::role('dosen')->get()->map(function ($dosen) {
+            // Gabungkan mahasiswa dari dosen_pembimbing_id dan laporan
+            $mahasiswaIds = collect();
+            $mahasiswaIds = $mahasiswaIds->merge(
+                User::role('mahasiswa')->where('dosen_pembimbing_id', $dosen->id)->pluck('id')
+            );
+            $mahasiswaIds = $mahasiswaIds->merge(
+                Laporan::where('dosen_id', $dosen->id)->pluck('mahasiswa_id')->filter()
+            );
+
+            // Return as array with computed count
+            return (object) [
+                'id' => $dosen->id,
+                'name' => $dosen->name,
+                'email' => $dosen->email,
+                'mahasiswa_bimbingan_count' => $mahasiswaIds->unique()->filter()->count()
+            ];
+        })->sortByDesc('mahasiswa_bimbingan_count')->values()->take(5);
 
         // Calculate percentages
         $onTrackPercent = $totalMahasiswa > 0 ? round(($mahasiswaOnTrack / $totalMahasiswa) * 100) : 0;
@@ -109,9 +122,9 @@ class AdminDashboard extends Page
             'atRiskPercent' => $atRiskPercent,
             'overduePercent' => $overduePercent,
             'totalLaporan' => $totalLaporan,
-            'laporanSkripsi' => $laporanSkripsi,
-            'laporanPkl' => $laporanPkl,
+            'laporanProposal' => $laporanProposal,
             'laporanMagang' => $laporanMagang,
+            'laporanSkripsi' => $laporanSkripsi,
             'dosenList' => $dosenList,
         ];
     }

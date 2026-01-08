@@ -59,17 +59,14 @@ class LaporanMingguanResource extends Resource
         $user = auth()->user();
 
         if ($user->hasRole('mahasiswa')) {
-            return $query->whereHas('laporan', function ($q) use ($user) {
-                $q->where('mahasiswa_id', $user->id);
-            });
+            return $query->where('mahasiswa_id', $user->id);
         }
 
         if ($user->hasRole('dosen')) {
-            return $query->whereHas('laporan', function ($q) use ($user) {
-                $q->where('dosen_id', $user->id);
-            });
+            return $query->where('dosen_id', $user->id);
         }
 
+        // Super admin lihat semua
         return $query;
     }
 

@@ -580,11 +580,14 @@
                 <div style="margin-top: 1.5rem;">
                     <div class="progress-label" style="margin-bottom: 0.75rem;">Status Laporan</div>
                     <div>
-                        <span class="laporan-badge {{ $laporanSkripsi ? 'active' : 'inactive' }}">
-                            📚 Skripsi {{ $laporanSkripsi ? '✓' : '' }}
+                        <span class="laporan-badge {{ $laporanProposal ? 'active' : 'inactive' }}">
+                            📄 Proposal {{ $laporanProposal ? '✓' : '' }}
                         </span>
                         <span class="laporan-badge {{ $laporanMagang ? 'active' : 'inactive' }}">
                             🏢 Magang {{ $laporanMagang ? '✓' : '' }}
+                        </span>
+                        <span class="laporan-badge {{ $laporanSkripsi ? 'active' : 'inactive' }}">
+                            📚 Skripsi {{ $laporanSkripsi ? '✓' : '' }}
                         </span>
                     </div>
                 </div>

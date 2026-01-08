@@ -50,14 +50,19 @@ class LaporanForm
 
                 Select::make('type')
                     ->label('Tipe Laporan')
-                    ->options(function () use ($user) {
+                    ->options(function ($record) use ($user) {
                         $allTypes = [
                             'proposal' => 'Proposal',
                             'magang' => 'Magang',
                             'skripsi' => 'Skripsi',
                         ];
 
-                        // Filter tipe yang sudah ada laporan-nya (untuk mahasiswa)
+                        // Jika edit, return semua type agar value tetap ada
+                        if ($record && $record->type) {
+                            return $allTypes;
+                        }
+
+                        // Filter tipe yang sudah ada laporan-nya (untuk mahasiswa saat create)
                         if ($user->hasRole('mahasiswa')) {
                             $existingTypes = Laporan::where('mahasiswa_id', $user->id)
                                 ->pluck('type')
@@ -70,9 +75,13 @@ class LaporanForm
 
                         return $allTypes;
                     })
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
+                    ->disabled(fn($operation, $record) => $operation === 'edit' || auth()->user()?->hasRole('dosen'))
+                    ->dehydrated(true)
                     ->required()
-                    ->helperText(function () use ($user) {
+                    ->helperText(function ($operation) use ($user) {
+                        if ($operation === 'edit') {
+                            return 'ℹ️ Tipe laporan tidak dapat diubah';
+                        }
                         if ($user->hasRole('mahasiswa')) {
                             return 'ℹ️ Setiap tipe hanya bisa dibuat satu kali';
                         }
@@ -168,8 +177,15 @@ class LaporanForm
                     ])
                     ->default('review')
                     ->placeholder('Pilih status proses')
-                    ->visible($user->hasRole('super_admin'))
+                    ->visible(false)
                     ->columnSpan(1),
+
+                Textarea::make('komentar')
+                    ->label('Komentar')
+                    ->rows(4)
+                    ->placeholder('Tambahkan komentar untuk laporan ini...')
+                    ->visible(fn() => $user->hasRole('dosen') || $user->hasRole('super_admin'))
+                    ->nullable(),
             ]);
     }
 }

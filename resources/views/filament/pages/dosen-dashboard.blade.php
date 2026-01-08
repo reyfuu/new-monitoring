@@ -453,13 +453,12 @@
             new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Review', 'Fix', 'ACC', 'Selesai'],
+                    labels: ['Review', 'Ditolak', 'Disetujui'],
                     datasets: [{
-                        data: [statusData.review, statusData.fix, statusData.acc, statusData.selesai],
+                        data: [statusData.review, statusData.ditolak, statusData.disetujui],
                         backgroundColor: [
                             '#f59e0b',
-                            '#3b82f6',
-                            '#8b5cf6',
+                            '#ef4444',
                             '#10b981'
                         ],
                         borderWidth: 0,
@@ -488,13 +487,13 @@
             new Chart(laporanCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Skripsi', 'PKL', 'Magang'],
+                    labels: ['Proposal', 'Magang', 'Skripsi'],
                     datasets: [{
-                        data: [laporanData.skripsi, laporanData.pkl, laporanData.magang],
+                        data: [laporanData.proposal, laporanData.magang, laporanData.skripsi],
                         backgroundColor: [
                             '#6366f1',
-                            '#14b8a6',
-                            '#f97316'
+                            '#f97316',
+                            '#14b8a6'
                         ],
                         borderWidth: 0,
                         hoverOffset: 4

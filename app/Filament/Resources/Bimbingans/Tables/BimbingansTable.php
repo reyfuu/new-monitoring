@@ -115,27 +115,6 @@ class BimbingansTable
                         default => $state,
                     }),
 
-                // STATUS PROGRESS (STATUS DOMEN)
-                BadgeColumn::make('status_domen')
-                    ->label('Status Domen')
-                    ->colors([
-                        'warning' => 'revisi',
-                        'info' => 'review',
-                        'success' => 'fix',
-                        'primary' => 'acc',
-                        'danger' => 'tolak',
-                        'gray' => 'selesai',
-                    ])
-                    ->formatStateUsing(fn($state) => match ($state) {
-                        'revisi' => '🔄 Revisi',
-                        'review' => '👀 Review',
-                        'fix' => '✅ Fix',
-                        'acc' => '🎉 ACC',
-                        'tolak' => '❌ Ditolak',
-                        'selesai' => '🏁 Selesai',
-                        default => $state,
-                    }),
-
                 // ISI
                 TextColumn::make('isi')
                     ->label('Isi Pertemuan')
@@ -175,6 +154,7 @@ class BimbingansTable
                 CreateAction::make()
                     ->label('Buat Bimbingan Baru')
                     ->icon('heroicon-o-plus')
+                    ->visible($user->hasRole('mahasiswa'))
             ])
             ->filters([
                 // Filter Status - Admin
@@ -193,19 +173,6 @@ class BimbingansTable
                     ->searchable()
                     ->preload()
                     ->visible($user->hasRole('dosen')),
-
-                // Filter Progress - Mahasiswa
-                SelectFilter::make('status_domen')
-                    ->label('Status Domen')
-                    ->options([
-                        'revisi' => '🔄 Butuh Revisi',
-                        'review' => '👀 Dalam Review',
-                        'fix' => '✅ Sudah Fix',
-                        'acc' => '🎉 Diterima (ACC)',
-                        'tolak' => '❌ Ditolak',
-                        'selesai' => '🏁 Selesai',
-                    ])
-                    ->visible($user->hasRole('mahasiswa')),
 
                 // Filter Jenis Bimbingan
                 SelectFilter::make('type')

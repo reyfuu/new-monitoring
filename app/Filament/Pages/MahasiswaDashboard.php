@@ -43,48 +43,34 @@ class MahasiswaDashboard extends Page
         // Total Bimbingan milik mahasiswa
         $totalBimbingan = Bimbingan::where('user_id', $user->id)->count();
 
-        // Bimbingan terverifikasi (sudah di-review dosen)
+        // Bimbingan terverifikasi (status = disetujui)
         $bimbinganTerverifikasi = Bimbingan::where('user_id', $user->id)
-            ->whereIn('status_domen', ['fix', 'acc', 'selesai'])
+            ->where('status', 'disetujui')
             ->count();
 
-        // Bimbingan menunggu review
+        // Bimbingan menunggu review (status = pending)
         $bimbinganMenunggu = Bimbingan::where('user_id', $user->id)
-            ->where(function ($q) {
-                $q->whereNull('status_domen')
-                    ->orWhere('status_domen', 'review');
-            })
+            ->where('status', 'pending')
             ->count();
 
         // Total Laporan
         $totalLaporan = Laporan::where('mahasiswa_id', $user->id)->count();
 
-        // Laporan by type
-        $laporanSkripsi = Laporan::where('mahasiswa_id', $user->id)->where('type', 'skripsi')->first();
-        $laporanPkl = Laporan::where('mahasiswa_id', $user->id)->where('type', 'pkl')->first();
+        // Laporan by type (proposal, magang, skripsi)
+        $laporanProposal = Laporan::where('mahasiswa_id', $user->id)->where('type', 'proposal')->first();
         $laporanMagang = Laporan::where('mahasiswa_id', $user->id)->where('type', 'magang')->first();
+        $laporanSkripsi = Laporan::where('mahasiswa_id', $user->id)->where('type', 'skripsi')->first();
 
         // Dosen pembimbing info - kumpulkan semua dosen dari laporan
         $dosenPembimbingList = [];
 
-        if ($laporanSkripsi && $laporanSkripsi->dosen_id) {
-            $dosen = \App\Models\User::find($laporanSkripsi->dosen_id);
+        if ($laporanProposal && $laporanProposal->dosen_id) {
+            $dosen = \App\Models\User::find($laporanProposal->dosen_id);
             if ($dosen) {
                 $dosenPembimbingList[] = [
                     'dosen' => $dosen,
-                    'type' => 'Skripsi',
-                    'icon' => '📚'
-                ];
-            }
-        }
-
-        if ($laporanPkl && $laporanPkl->dosen_id) {
-            $dosen = \App\Models\User::find($laporanPkl->dosen_id);
-            if ($dosen) {
-                $dosenPembimbingList[] = [
-                    'dosen' => $dosen,
-                    'type' => 'PKL',
-                    'icon' => '💼'
+                    'type' => 'Proposal',
+                    'icon' => '📄'
                 ];
             }
         }
@@ -96,6 +82,17 @@ class MahasiswaDashboard extends Page
                     'dosen' => $dosen,
                     'type' => 'Magang',
                     'icon' => '🏢'
+                ];
+            }
+        }
+
+        if ($laporanSkripsi && $laporanSkripsi->dosen_id) {
+            $dosen = \App\Models\User::find($laporanSkripsi->dosen_id);
+            if ($dosen) {
+                $dosenPembimbingList[] = [
+                    'dosen' => $dosen,
+                    'type' => 'Skripsi',
+                    'icon' => '📚'
                 ];
             }
         }
@@ -126,9 +123,9 @@ class MahasiswaDashboard extends Page
             'bimbinganTerverifikasi' => $bimbinganTerverifikasi,
             'bimbinganMenunggu' => $bimbinganMenunggu,
             'totalLaporan' => $totalLaporan,
-            'laporanSkripsi' => $laporanSkripsi,
-            'laporanPkl' => $laporanPkl,
+            'laporanProposal' => $laporanProposal,
             'laporanMagang' => $laporanMagang,
+            'laporanSkripsi' => $laporanSkripsi,
             'dosenPembimbingList' => $dosenPembimbingList,
             'bimbinganTerakhir' => $bimbinganTerakhir,
             'progressPercent' => $progressPercent,

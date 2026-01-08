@@ -491,18 +491,18 @@
                         </div>
 
                         <div class="quick-stat-item success">
-                            <div class="quick-stat-label">Laporan Skripsi</div>
-                            <div class="quick-stat-value">{{ $laporanSkripsi }}</div>
-                        </div>
-
-                        <div class="quick-stat-item primary">
-                            <div class="quick-stat-label">Laporan PKL</div>
-                            <div class="quick-stat-value">{{ $laporanPkl }}</div>
+                            <div class="quick-stat-label">Laporan Proposal</div>
+                            <div class="quick-stat-value">{{ $laporanProposal }}</div>
                         </div>
 
                         <div class="quick-stat-item success">
                             <div class="quick-stat-label">Laporan Magang</div>
                             <div class="quick-stat-value">{{ $laporanMagang }}</div>
+                        </div>
+
+                        <div class="quick-stat-item success">
+                            <div class="quick-stat-label">Laporan Skripsi</div>
+                            <div class="quick-stat-value">{{ $laporanSkripsi }}</div>
                         </div>
                     </div>
                 </div>

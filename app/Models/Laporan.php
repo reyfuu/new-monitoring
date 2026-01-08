@@ -17,15 +17,16 @@ class Laporan extends Model
         'status',
         'status_dosen',
         'type',
+        'komentar',
     ];
 
     public function mahasiswa()
     {
-        return $this->belongsTo(User::class, 'mahasiswa_id')->whereHas('roles', fn ($q) => $q->where('name', 'mahasiswa'));
+        return $this->belongsTo(User::class, 'mahasiswa_id')->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'));
     }
 
     public function dosen()
     {
-        return $this->belongsTo(User::class, 'dosen_id')->whereHas('roles', fn ($q) => $q->where('name', 'dosen'));
+        return $this->belongsTo(User::class, 'dosen_id')->whereHas('roles', fn($q) => $q->where('name', 'dosen'));
     }
 }

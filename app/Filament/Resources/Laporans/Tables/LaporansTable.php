@@ -73,6 +73,16 @@ class LaporansTable
                 TextColumn::make('tanggal_mulai')
                     ->label('Mulai')
                     ->date(),
+
+                TextColumn::make('komentar')
+                    ->label('Komentar')
+                    ->limit(40)
+                    ->placeholder('Belum ada komentar')
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        return strlen($state) > 40 ? $state : null;
+                    })
+                    ->toggleable(),
             ])
             ->headerActions([
                 CreateAction::make()
@@ -81,9 +91,10 @@ class LaporansTable
                     ->visible(fn() => $user->hasRole('mahasiswa')),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn($record) => $record->status !== 'disetujui'),
                 DeleteAction::make()
-                    ->visible(fn() => $user->hasRole('mahasiswa') || $user->hasRole('super_admin')),
+                    ->visible(fn($record) => ($user->hasRole('mahasiswa') || $user->hasRole('super_admin')) && $record->status !== 'disetujui'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
