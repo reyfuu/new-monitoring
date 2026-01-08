@@ -19,4 +19,14 @@ class LaporanMingguan extends Model
     {
         return $this->belongsTo(Laporan::class, 'laporan_id');
     }
+
+    public function mahasiswa()
+    {
+        return $this->belongsTo(User::class, 'mahasiswa_id');
+    }
+
+    public function dosen()
+    {
+        return $this->belongsTo(User::class, 'dosen_id');
+    }
 }

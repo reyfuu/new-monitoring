@@ -31,7 +31,7 @@ class CreateLaporanMingguan extends CreateRecord
 
         if ($user->hasRole('mahasiswa')) {
             $data['mahasiswa_id'] = $user->id;
-            $data['dosen_id'] = $user->dosen_pembimbing_id;
+            $data['dosen'] = $user->dosen_pembimbing_id;
             $data['status'] = 'pending';
         }
 

@@ -28,12 +28,12 @@ class LaporanMingguansTable
         return $table
             ->recordUrl(null)
             ->groups($user->hasRole('mahasiswa') ? [] : [
-                Group::make('laporan.mahasiswa.name')
+                Group::make('mahasiswa.name')
                     ->label('Mahasiswa')
                     ->collapsible()
                     ->titlePrefixedWithLabel(false),
             ])
-            ->defaultGroup($user->hasRole('mahasiswa') ? null : 'laporan.mahasiswa.name')
+            ->defaultGroup($user->hasRole('mahasiswa') ? null : 'mahasiswa.name')
             ->groupingSettingsInDropdownOnDesktop()
             ->groupsOnly(false)
             ->columns([

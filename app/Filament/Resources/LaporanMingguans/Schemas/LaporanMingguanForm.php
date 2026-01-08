@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LaporanMingguans\Schemas;
 
 use App\Models\Laporan;
+use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -50,6 +51,19 @@ class LaporanMingguanForm
                 ->required()
                 ->disabled(fn() => $user->hasRole('dosen'))
                 ->helperText('Masukkan angka minggu ke berapa (1-26, maks. 6 bulan)'),
+
+            Select::make('dosen_id')
+                ->label('Dosen Pembimbing')
+                ->options(
+                    User::role('dosen')
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
+                ->searchable()
+                ->required()
+                ->disabled(fn() => $user->hasRole('dosen'))
+                ->placeholder('Pilih Dosen Pembimbing')
+                ->helperText('Pilih dosen pembimbing yang akan membimbing laporan mingguan Anda.'),
 
             TextInput::make('isi')
                 ->label('Link Dokumen Laporan')
