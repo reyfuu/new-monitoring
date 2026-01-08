@@ -521,7 +521,7 @@
                 <div class="bimbingan-list">
                     @forelse($bimbinganTerakhir as $bimbingan)
                         @php
-                            $isVerified = in_array($bimbingan->status_domen, ['fix', 'acc', 'selesai']);
+                            $isVerified = in_array($bimbingan->status, ['disetujui']);
                         @endphp
                         <div class="bimbingan-item">
                             <div class="bimbingan-header">

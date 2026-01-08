@@ -95,7 +95,7 @@ class User extends Authenticatable
     // ✅ NEW: List status_domen yang dianggap "selesai/terverifikasi"
     public function getStatusDomenTerverifikasiAttribute()
     {
-        return ['fix', 'acc', 'selesai'];
+        return ['disetujui'];
     }
 
     public function laporanSebagaiMahasiswa()

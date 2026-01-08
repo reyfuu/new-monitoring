@@ -44,20 +44,20 @@ class KaprodiDashboard extends Page
 
         // Bimbingan stats
         $totalBimbingan = Bimbingan::where('status', 'completed')->count();
-        $bimbinganSelesai = Bimbingan::whereIn('status_domen', ['fix', 'acc', 'selesai'])->count();
+        $bimbinganSelesai = Bimbingan::whereIn('status_domen', ['disetujui'])->count();
         $bimbinganReview = Bimbingan::where('status_domen', 'review')->orWhereNull('status_domen')->count();
 
         // Mahasiswa On Track (punya bimbingan dengan status selesai)
         $mahasiswaOnTrack = User::role('mahasiswa')
             ->whereHas('bimbingans', function ($q) {
-                $q->whereIn('status_domen', ['fix', 'acc', 'selesai']);
+                $q->whereIn('status_domen', ['disetujui']);
             })->count();
 
         // Mahasiswa At Risk (punya bimbingan tapi belum ada yang selesai)
         $mahasiswaAtRisk = User::role('mahasiswa')
             ->whereHas('bimbingans')
             ->whereDoesntHave('bimbingans', function ($q) {
-                $q->whereIn('status_domen', ['fix', 'acc', 'selesai']);
+                $q->whereIn('status_domen', ['disetujui']);
             })->count();
 
         // Mahasiswa Overdue (tidak punya bimbingan sama sekali / belum ada bimbingan)
