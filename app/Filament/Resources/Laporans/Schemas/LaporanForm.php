@@ -31,15 +31,15 @@ class LaporanForm
 
                 DatePicker::make('tanggal_mulai')
                     ->required()
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen') && fn() => auth()->user()?->hasRole('mahasiswa'))
                     ->default(now())
                     ->dehydrated(true)
-                    ->visible(fn($operation) => $operation === 'edit' && !auth()->user()?->hasRole('dosen'))
+                    ->visible(fn($operation) => $operation === 'edit' && !auth()->user()?->hasRole('dosen') && !auth()->user()?->hasRole('mahasiswa'))
                     ->label('Tanggal Mulai'),
 
                 DatePicker::make('tanggal_berakhir')
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->visible(fn($operation) => $operation === 'edit' && !auth()->user()?->hasRole('dosen'))
+                    ->disabled(fn() => auth()->user()?->hasRole('dosen') && fn() => auth()->user()?->hasRole('mahasiswa'))
+                    ->visible(fn($operation) => $operation === 'edit' && !auth()->user()?->hasRole('dosen') && !auth()->user()?->hasRole('mahasiswa'))
                     ->label('Tanggal Berakhir'),
 
                 Textarea::make('deskripsi')
