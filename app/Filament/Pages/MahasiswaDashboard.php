@@ -43,23 +43,44 @@ class MahasiswaDashboard extends Page
         // Total Bimbingan milik mahasiswa
         $totalBimbingan = Bimbingan::where('user_id', $user->id)->count();
 
+        // Total Laporan
+        $totalLaporan = Laporan::where('mahasiswa_id', $user->id)->count();
+
+        // Laporan by type (proposal, magang, skripsi) - diambil dulu untuk digunakan di beberapa tempat
+        $laporanProposal = Laporan::where('mahasiswa_id', $user->id)->where('type', 'proposal')->first();
+        $laporanMagang = Laporan::where('mahasiswa_id', $user->id)->where('type', 'magang')->first();
+        $laporanSkripsi = Laporan::where('mahasiswa_id', $user->id)->where('type', 'skripsi')->first();
+
         // Bimbingan terverifikasi (status = disetujui)
         $bimbinganTerverifikasi = Bimbingan::where('user_id', $user->id)
             ->where('status', 'disetujui')
             ->count();
 
         // Bimbingan menunggu review (status = pending)
-        $bimbinganMenunggu = Bimbingan::where('user_id', $user->id)
-            ->where('status', 'pending')
-            ->count();
-
-        // Total Laporan
-        $totalLaporan = Laporan::where('mahasiswa_id', $user->id)->count();
-
-        // Laporan by type (proposal, magang, skripsi)
-        $laporanProposal = Laporan::where('mahasiswa_id', $user->id)->where('type', 'proposal')->first();
-        $laporanMagang = Laporan::where('mahasiswa_id', $user->id)->where('type', 'magang')->first();
-        $laporanSkripsi = Laporan::where('mahasiswa_id', $user->id)->where('type', 'skripsi')->first();
+        // Untuk magang: ambil dari laporan mingguan
+        // Untuk skripsi: ambil dari bimbingan
+        $bimbinganMenunggu = 0;
+        
+        if ($laporanMagang) {
+            // Jika magang, hitung dari laporan mingguan yang pending
+            $bimbinganMenunggu += LaporanMingguan::where('mahasiswa_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+        }
+        
+        if ($laporanSkripsi) {
+            // Jika skripsi, hitung dari bimbingan yang pending
+            $bimbinganMenunggu += Bimbingan::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+        }
+        
+        // Jika tidak ada laporan magang atau skripsi, default ke bimbingan
+        if (!$laporanMagang && !$laporanSkripsi) {
+            $bimbinganMenunggu = Bimbingan::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+        }
 
         // Dosen pembimbing info - kumpulkan semua dosen dari laporan
         $dosenPembimbingList = [];
