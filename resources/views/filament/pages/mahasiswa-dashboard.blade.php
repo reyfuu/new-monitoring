@@ -509,33 +509,52 @@
 
         <!-- Content Grid -->
         <div class="content-grid">
-            <!-- Bimbingan Terakhir -->
+            <!-- Bimbingan Terakhir / Laporan Mingguan Terakhir -->
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <span class="card-title-icon">📝</span>
-                        Bimbingan Terakhir
+                        <span class="card-title-icon">{{ $isInternship ? '📊' : '📝' }}</span>
+                        {{ $isInternship ? 'Laporan Mingguan Terakhir' : 'Bimbingan Terakhir' }}
                     </h3>
                 </div>
 
                 <div class="bimbingan-list">
-                    @forelse($bimbinganTerakhir as $bimbingan)
-                        @php
-                            $isVerified = in_array($bimbingan->status, ['disetujui']);
-                        @endphp
-                        <div class="bimbingan-item">
-                            <div class="bimbingan-header">
-                                <div class="bimbingan-topik">{{ $bimbingan->topik ?? 'Bimbingan #' . $bimbingan->id }}</div>
-                                <div class="bimbingan-badge {{ $isVerified ? 'success' : 'warning' }}">
-                                    {{ $isVerified ? '✓ Terverifikasi' : '⏳ Menunggu' }}
+                    @forelse($bimbinganTerakhir as $item)
+                        @if($isInternship)
+                            {{-- Display Laporan Mingguan --}}
+                            @php
+                                $isVerified = in_array($item->status, ['disetujui']);
+                            @endphp
+                            <div class="bimbingan-item">
+                                <div class="bimbingan-header">
+                                    <div class="bimbingan-topik">{{ $item->judul ?? 'Minggu ' . $item->minggu_ke }}</div>
+                                    <div class="bimbingan-badge {{ $isVerified ? 'success' : 'warning' }}">
+                                        {{ $isVerified ? '✓ Terverifikasi' : '⏳ Menunggu' }}
+                                    </div>
+                                </div>
+                                <div class="bimbingan-date">
+                                    📅 {{ $item->created_at?->format('d M Y') ?? '-' }} | Minggu ke-{{ $item->minggu_ke }}
                                 </div>
                             </div>
-                            <div class="bimbingan-date">
-                                📅 {{ $bimbingan->tanggal?->format('d M Y') ?? '-' }}
+                        @else
+                            {{-- Display Bimbingan --}}
+                            @php
+                                $isVerified = in_array($item->status, ['disetujui']);
+                            @endphp
+                            <div class="bimbingan-item">
+                                <div class="bimbingan-header">
+                                    <div class="bimbingan-topik">{{ $item->topik ?? 'Bimbingan #' . $item->id }}</div>
+                                    <div class="bimbingan-badge {{ $isVerified ? 'success' : 'warning' }}">
+                                        {{ $isVerified ? '✓ Terverifikasi' : '⏳ Menunggu' }}
+                                    </div>
+                                </div>
+                                <div class="bimbingan-date">
+                                    📅 {{ $item->tanggal?->format('d M Y') ?? '-' }}
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     @empty
-                        <p class="empty-text">Belum ada data bimbingan</p>
+                        <p class="empty-text">{{ $isInternship ? 'Belum ada laporan mingguan' : 'Belum ada data bimbingan' }}</p>
                     @endforelse
                 </div>
             </div>

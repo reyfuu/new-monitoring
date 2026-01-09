@@ -127,11 +127,25 @@ class MahasiswaDashboard extends Page
             ];
         }
 
-        // Bimbingan terakhir (5 terakhir)
-        $bimbinganTerakhir = Bimbingan::where('user_id', $user->id)
-            ->orderByDesc('tanggal')
-            ->take(5)
-            ->get();
+        // Bimbingan/Laporan Mingguan terakhir (5 terakhir)
+        // Untuk magang: ambil dari laporan mingguan
+        // Untuk skripsi: ambil dari bimbingan
+        $bimbinganTerakhir = collect();
+        $isInternship = $user->kategori === 'magang';
+        
+        if ($isInternship) {
+            // Ambil laporan mingguan untuk mahasiswa magang
+            $bimbinganTerakhir = LaporanMingguan::where('mahasiswa_id', $user->id)
+                ->orderByDesc('created_at')
+                ->take(5)
+                ->get();
+        } else {
+            // Ambil bimbingan regular untuk mahasiswa skripsi
+            $bimbinganTerakhir = Bimbingan::where('user_id', $user->id)
+                ->orderByDesc('tanggal')
+                ->take(5)
+                ->get();
+        }
 
         // Calculate progress percentage
         $progressPercent = $totalBimbingan > 0
@@ -150,6 +164,7 @@ class MahasiswaDashboard extends Page
             'dosenPembimbingList' => $dosenPembimbingList,
             'bimbinganTerakhir' => $bimbinganTerakhir,
             'progressPercent' => $progressPercent,
+            'isInternship' => $isInternship,
         ];
     }
 }
