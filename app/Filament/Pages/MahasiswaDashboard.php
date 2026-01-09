@@ -40,9 +40,6 @@ class MahasiswaDashboard extends Page
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Total Bimbingan milik mahasiswa
-        $totalBimbingan = Bimbingan::where('user_id', $user->id)->count();
-
         // Total Laporan
         $totalLaporan = Laporan::where('mahasiswa_id', $user->id)->count();
 
@@ -51,10 +48,30 @@ class MahasiswaDashboard extends Page
         $laporanMagang = Laporan::where('mahasiswa_id', $user->id)->where('type', 'magang')->first();
         $laporanSkripsi = Laporan::where('mahasiswa_id', $user->id)->where('type', 'skripsi')->first();
 
+        // Cek kategori untuk menentukan sumber data
+        $isInternship = $user->kategori === 'magang';
+
+        // Total Bimbingan milik mahasiswa
+        // Untuk magang: hitung dari laporan mingguan
+        // Untuk skripsi: hitung dari bimbingan
+        if ($isInternship) {
+            $totalBimbingan = LaporanMingguan::where('mahasiswa_id', $user->id)->count();
+        } else {
+            $totalBimbingan = Bimbingan::where('user_id', $user->id)->count();
+        }
+
         // Bimbingan terverifikasi (status = disetujui)
-        $bimbinganTerverifikasi = Bimbingan::where('user_id', $user->id)
-            ->where('status', 'disetujui')
-            ->count();
+        // Untuk magang: hitung dari laporan mingguan yang disetujui
+        // Untuk skripsi: hitung dari bimbingan yang disetujui
+        if ($isInternship) {
+            $bimbinganTerverifikasi = LaporanMingguan::where('mahasiswa_id', $user->id)
+                ->where('status', 'disetujui')
+                ->count();
+        } else {
+            $bimbinganTerverifikasi = Bimbingan::where('user_id', $user->id)
+                ->where('status', 'disetujui')
+                ->count();
+        }
 
         // Bimbingan menunggu review (status = pending)
         // Untuk magang: ambil dari laporan mingguan
@@ -131,7 +148,6 @@ class MahasiswaDashboard extends Page
         // Untuk magang: ambil dari laporan mingguan
         // Untuk skripsi: ambil dari bimbingan
         $bimbinganTerakhir = collect();
-        $isInternship = $user->kategori === 'magang';
         
         if ($isInternship) {
             // Ambil laporan mingguan untuk mahasiswa magang

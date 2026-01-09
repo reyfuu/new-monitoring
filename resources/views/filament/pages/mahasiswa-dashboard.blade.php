@@ -527,13 +527,13 @@
                             @endphp
                             <div class="bimbingan-item">
                                 <div class="bimbingan-header">
-                                    <div class="bimbingan-topik">{{ $item->judul ?? 'Minggu ' . $item->minggu_ke }}</div>
+                                    <div class="bimbingan-topik">{{ $item->judul ?? 'Minggu ' . $item->week }}</div>
                                     <div class="bimbingan-badge {{ $isVerified ? 'success' : 'warning' }}">
                                         {{ $isVerified ? '✓ Terverifikasi' : '⏳ Menunggu' }}
                                     </div>
                                 </div>
                                 <div class="bimbingan-date">
-                                    📅 {{ $item->created_at?->format('d M Y') ?? '-' }} | Minggu ke-{{ $item->minggu_ke }}
+                                    📅 {{ $item->created_at?->format('d M Y') ?? '-' }} | Minggu ke-{{ $item->week }}
                                 </div>
                             </div>
                         @else
