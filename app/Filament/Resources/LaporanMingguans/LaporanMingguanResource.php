@@ -70,34 +70,6 @@ class LaporanMingguanResource extends Resource
         return $query;
     }
 
-    /**
-     * Cek apakah record bisa diedit
-     * Tidak bisa diedit jika sudah disetujui
-     */
-    public static function canEdit($record): bool
-    {
-        // Jika status sudah disetujui, tidak bisa diedit
-        if ($record->status === 'disetujui') {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Cek apakah record bisa dihapus
-     * Tidak bisa dihapus jika sudah disetujui
-     */
-    public static function canDelete($record): bool
-    {
-        // Jika status sudah disetujui, tidak bisa dihapus
-        if ($record->status === 'disetujui') {
-            return false;
-        }
-
-        return true;
-    }
-
     public static function shouldRegisterNavigation(): bool
     {
         /** @var \App\Models\User|null $user */
