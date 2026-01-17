@@ -107,4 +107,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Laporan::class, 'dosen_id');
     }
+    
 }

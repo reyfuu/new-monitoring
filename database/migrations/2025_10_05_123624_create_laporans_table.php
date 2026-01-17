@@ -26,7 +26,6 @@ return new class extends Migration
 
             $table->string('dokumen', 255)->nullable();
             $table->string('status', 50)->nullable()->default('pending');
-            $table->string('status_dosen', 50)->nullable();
             $table->enum('type', ['proposal', 'magang', 'skripsi'])->nullable();
             $table->timestamps();
 

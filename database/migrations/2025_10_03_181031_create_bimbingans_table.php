@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('topik', 50)->nullable();
             $table->string('status', 50)->nullable();
-            $table->string('status_domen', 50)->nullable();
             $table->unsignedBigInteger('user_id'); // mahasiswa
             $table->unsignedBigInteger('dosen_id')->nullable(); // dosen
             $table->date('tanggal')->nullable();

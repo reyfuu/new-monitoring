@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
+use Filament\Forms\Components\Hidden;
 
 class UserForm
 {
@@ -22,22 +23,32 @@ class UserForm
                 ->searchable()
                 ->required()
                 ->reactive()
-                ->placeholder('Pilih role user'),
+                ->required()
+                ->placeholder('Pilih role user')
+                ->afterStateUpdated(function (?array $state, callable $set) {
 
+                    $roleNames = Role::whereIn('id', $state)
+                        ->pluck('name')
+                        ->toArray();
 
+                    $set('selected_role_names', $roleNames);
+                }),
+
+            Hidden::make('selected_role_names')
+                ->dehydrated(false),
             TextInput::make('npm')
                 ->label('NPM')
+                ->required() 
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NPM mahasiswa')
-                ->visible(function ($get) {
-                    $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
-                    return in_array('mahasiswa', $roles);
-                })
+                ->required(fn ($get)=> in_array('mahasiswa', $get('selected_role_names') ?? []))
+                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
                 ->nullable(),
 
             TextInput::make('nidn')
                 ->label('NIDN')
+
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NIDN dosen')
@@ -93,7 +104,8 @@ class UserForm
             // 🎓 Angkatan
             TextInput::make('angkatan')
                 ->maxLength(10)
-                ->placeholder('Contoh: 2024')
+                ->required()
+                ->placeholder('Contoh: 2025')
                 ->visible(function ($get) {
                     $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
                     return in_array('mahasiswa', $roles);
@@ -103,6 +115,7 @@ class UserForm
             // 📚 Kategori Mahasiswa
             Select::make('kategori')
                 ->label('Kategori Mahasiswa')
+                ->required()
                 ->options([
                     'skripsi' => 'Skripsi',
                     'magang' => 'Magang',
@@ -117,6 +130,7 @@ class UserForm
 
             Select::make('dosen_pembimbing_id')
                 ->label('Dosen Pembimbing')
+                ->required()
                 ->relationship(
                     name: 'dosenPembimbing',
                     titleAttribute: 'name',

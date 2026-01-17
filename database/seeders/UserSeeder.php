@@ -30,6 +30,9 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Audi',
                 'password' => Hash::make('mahasiswa123'),
+                'angkatan' => 2019,
+                'kategori' => 'skripsi',
+                'npm' => '19340019'
             ]
         );
         $mahasiswa1->syncRoles(['mahasiswa']);
@@ -41,6 +44,8 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Dudu',
                 'password' => Hash::make('mahasiswa123'),
+                'angkatan' => 2020,
+                'kategori' => 'magang',
             ]
         );
         $mahasiswa2->syncRoles(['mahasiswa']);

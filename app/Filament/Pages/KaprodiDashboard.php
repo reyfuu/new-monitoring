@@ -62,6 +62,7 @@ class KaprodiDashboard extends Page
 
         // Mahasiswa Overdue (tidak punya bimbingan sama sekali / belum ada bimbingan)
         $mahasiswaOverdue = User::role('mahasiswa')
+            ->where('kategori','skripsi')
             ->whereDoesntHave('bimbingans')
             ->count();
 

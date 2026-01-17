@@ -34,7 +34,6 @@ class BimbingansTable
                     ->getTitleFromRecordUsing(function ($record) {
                         // Hitung total bimbingan untuk mahasiswa ini
                         $totalPertemuan = \App\Models\Bimbingan::where('user_id', $record->user_id)
-                            ->where('status', 'completed')
                             ->count();
 
                         return $record->mahasiswa->name . " ({$totalPertemuan} pertemuan)";
