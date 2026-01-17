@@ -46,7 +46,7 @@ class LaporanForm
                     ->label('Deskripsi')
                     ->rows(3)
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->nullable(),
+                    ->required(),
 
                 Select::make('type')
                     ->label('Tipe Laporan')
@@ -153,7 +153,7 @@ class LaporanForm
                     ->maxSize(10240) // 10MB
                     ->helperText('Format: PDF, Maksimal 10MB')
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->nullable(),
+                    ->required(),
 
                 Select::make('status')
                     ->label('Status')

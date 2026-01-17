@@ -21,16 +21,14 @@ class UserForm
                 ->multiple()
                 ->preload()
                 ->searchable()
-                ->required()
-                ->reactive()
+                ->live()
                 ->required()
                 ->placeholder('Pilih role user')
                 ->afterStateUpdated(function (?array $state, callable $set) {
 
-                    $roleNames = Role::whereIn('id', $state)
-                        ->pluck('name')
-                        ->toArray();
-
+                    $roleNames = $state
+                        ? Role::whereIn('id', $state)->pluck('name')->toArray()
+                        : [];
                     $set('selected_role_names', $roleNames);
                 }),
 
@@ -42,9 +40,9 @@ class UserForm
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NPM mahasiswa')
-                ->required(fn ($get)=> in_array('mahasiswa', $get('selected_role_names') ?? []))
-                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
-                ->nullable(),
+                ->required(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
+                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? [])),
+
 
             TextInput::make('nidn')
                 ->label('NIDN')
@@ -52,12 +50,10 @@ class UserForm
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NIDN dosen')
-                ->visible(function ($get) {
-                    $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
-                    return in_array('dosen', $roles);
-                })
-                ->nullable(),
+                ->required(fn ($get) => in_array('dosen', $get('selected_role_names') ?? []))
+                ->visible(fn ($get) => in_array('dosen', $get('selected_role_names') ?? [])),
 
+           
 
             // 🧍 Nama
             TextInput::make('name')
@@ -109,13 +105,14 @@ class UserForm
                 ->visible(function ($get) {
                     $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
                     return in_array('mahasiswa', $roles);
-                })
-                ->nullable(),
+                }),
+
 
             // 📚 Kategori Mahasiswa
             Select::make('kategori')
                 ->label('Kategori Mahasiswa')
-                ->required()
+                ->required(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
+                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
                 ->options([
                     'skripsi' => 'Skripsi',
                     'magang' => 'Magang',
@@ -125,12 +122,13 @@ class UserForm
                     return in_array('mahasiswa', $roles);
                 })
                 ->placeholder('Pilih kategori mahasiswa')
-                ->helperText('Skripsi: Dashboard, Laporan, Bimbingan | Magang: Dashboard, Laporan Mingguan, Laporan')
-                ->nullable(),
+                ->helperText('Skripsi: Dashboard, Laporan, Bimbingan | Magang: Dashboard, Laporan Mingguan, Laporan'),
+
 
             Select::make('dosen_pembimbing_id')
                 ->label('Dosen Pembimbing')
-                ->required()
+                ->required(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
+                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
                 ->relationship(
                     name: 'dosenPembimbing',
                     titleAttribute: 'name',
@@ -140,7 +138,6 @@ class UserForm
                 )
                 ->searchable()
                 ->preload()
-                ->nullable()
                 ->reactive()
                 ->hidden(function ($get) {
                     $roles = \Spatie\Permission\Models\Role::whereIn('id', (array) $get('roles'))
