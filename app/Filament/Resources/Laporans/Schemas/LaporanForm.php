@@ -160,7 +160,7 @@ class LaporanForm
                     ->options([
                         'pending' => 'Pending',
                         'disetujui' => 'Disetujui',
-                        'ditolak' => 'Ditolak',
+                        'revisi' => 'Revisi',
                     ])
                     ->default(fn() => $user->hasRole('mahasiswa') ? 'pending' : 'pending')
                     ->disabled(fn() => $user->hasRole('mahasiswa')) // mahasiswa tidak bisa ubah

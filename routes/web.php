@@ -26,7 +26,7 @@ Route::get('/view-pdf/{filename)',function ($filename){
         abort(404);
     }
 
-    return Storage::disk('local')->response($path);
+return Storage::disk('local')->response($path);
 
 })->name('pdf.view')->middleware('auth');
 

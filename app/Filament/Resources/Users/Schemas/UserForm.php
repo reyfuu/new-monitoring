@@ -34,24 +34,30 @@ class UserForm
 
             Hidden::make('selected_role_names')
                 ->dehydrated(false),
+
             TextInput::make('npm')
                 ->label('NPM')
-                ->required() 
+                ->required(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
+                                ->visible(function ($get) {
+                    $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
+                    return in_array('mahasiswa', $roles);
+                })
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
-                ->placeholder('Masukkan NPM mahasiswa')
-                ->required(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
-                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? [])),
+                ->placeholder('Masukkan NPM mahasiswa'),
+
 
 
             TextInput::make('nidn')
                 ->label('NIDN')
-
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NIDN dosen')
                 ->required(fn ($get) => in_array('dosen', $get('selected_role_names') ?? []))
-                ->visible(fn ($get) => in_array('dosen', $get('selected_role_names') ?? [])),
+                ->visible(function ($get) {
+                    $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
+                    return in_array('dosen', $roles);
+                }),
 
            
 
@@ -146,6 +152,8 @@ class UserForm
                     return !in_array('mahasiswa', $roles);
                 })
                 ->placeholder('Pilih dosen pembimbing'),
-        ]);
+    
+            ]);
+
     }
 }

@@ -99,7 +99,7 @@ class Dashboard extends Page
                 ->count();
 
             // Total Laporan
-            $totalLaporan = Laporan::count();
+
 
             // Laporan by type (proposal, magang, skripsi)
             $laporanProposal = Laporan::where('type', 'proposal')->count();
@@ -147,7 +147,6 @@ class Dashboard extends Page
                 'onTrackPercent' => $onTrackPercent,
                 'atRiskPercent' => $atRiskPercent,
                 'overduePercent' => $overduePercent,
-                'totalLaporan' => $totalLaporan,
                 'laporanProposal' => $laporanProposal,
                 'laporanMagang' => $laporanMagang,
                 'laporanSkripsi' => $laporanSkripsi,

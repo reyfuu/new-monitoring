@@ -208,7 +208,7 @@ class BimbinganForm
                             ->options([
                                 'menunggu' => 'Menunggu persetujuan',
                                 'disetujui' => 'Disetujui',
-                                'ditolak' => 'Ditolak',
+                                'revisi' => 'Revisi',
                             ])
                             ->default('pending')
                             ->required()

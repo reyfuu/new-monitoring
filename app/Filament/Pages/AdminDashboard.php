@@ -73,8 +73,6 @@ class AdminDashboard extends Page
             ->whereDoesntHave('bimbingans')
             ->count();
 
-        // Total Laporan
-        $totalLaporan = Laporan::count();
 
         // Laporan by type (proposal, magang, skripsi)
         $laporanProposal = Laporan::where('type', 'proposal')->count();
@@ -121,7 +119,6 @@ class AdminDashboard extends Page
             'onTrackPercent' => $onTrackPercent,
             'atRiskPercent' => $atRiskPercent,
             'overduePercent' => $overduePercent,
-            'totalLaporan' => $totalLaporan,
             'laporanProposal' => $laporanProposal,
             'laporanMagang' => $laporanMagang,
             'laporanSkripsi' => $laporanSkripsi,

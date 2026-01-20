@@ -465,11 +465,6 @@
                             <div class="quick-stat-value">{{ $totalDosen }}</div>
                         </div>
 
-                        <div class="quick-stat-item primary">
-                            <div class="quick-stat-label">Total Kaprodi</div>
-                            <div class="quick-stat-value">{{ $totalKaprodi }}</div>
-                        </div>
-
                         <div class="quick-stat-item success">
                             <div class="quick-stat-label">Total Bimbingan</div>
                             <div class="quick-stat-value">{{ $totalBimbingan }}</div>
@@ -485,10 +480,6 @@
                             <div class="quick-stat-value">{{ $bimbinganReview }}</div>
                         </div>
 
-                        <div class="quick-stat-item primary">
-                            <div class="quick-stat-label">Total Laporan</div>
-                            <div class="quick-stat-value">{{ $totalLaporan }}</div>
-                        </div>
 
                         <div class="quick-stat-item success">
                             <div class="quick-stat-label">Laporan Proposal</div>
