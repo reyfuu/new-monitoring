@@ -62,7 +62,7 @@ class UserForm
            
 
             // 🧍 Nama
-            TextInput::make('name')
+            TextInput::make('nama')
                 ->required()
                 ->maxLength(100)
                 ->placeholder('Nama lengkap'),
@@ -87,7 +87,7 @@ class UserForm
                 ->confirmed(),
 
             // 🔒 Konfirmasi Password
-            TextInput::make('password_confirmation')
+            TextInput::make('konfirmasi password')
                 ->password()
                 ->required(fn($operation) => $operation === 'create')
                 ->dehydrated(false)

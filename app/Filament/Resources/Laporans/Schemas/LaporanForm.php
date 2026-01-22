@@ -21,9 +21,17 @@ class LaporanForm
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        return $schema
-            ->components([
-                TextInput::make('judul')
+        $laporanQuery = Laporan::query();
+
+        if ($user->hasRole('mahasiswa')) {
+            $laporanQuery->where('mahasiswa_id', $user->id);
+        } elseif ($user->hasRole('dosen')) {
+            $laporanQuery->where('dosen_id', $user->id);
+        }
+
+
+        $componenents =[
+            TextInput::make('judul')
                     ->required()
                     ->maxLength(150)
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
@@ -88,105 +96,37 @@ class LaporanForm
                         return null;
                     }),
 
-                Select::make('mahasiswa_id')
-                    ->label('Mahasiswa')
-                    ->required()
-                    ->disabled(fn() => $user->hasRole('mahasiswa'))
-                    ->default(fn() => $user->hasRole('mahasiswa') ? $user->id : null)
-                    ->dehydrated(true) // ✅ WAJIB, agar tetap disimpan walau disabled
-                    ->options(function ($record) use ($user) {
-                        if ($user->hasRole('mahasiswa')) {
-                            return \App\Models\User::where('id', $user->id)->pluck('name', 'id');
-                        }
+                
 
-                        if ($user->hasRole('dosen')) {
-                            $query = \App\Models\User::query()
-                                ->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'))
-                                ->where('dosen_pembimbing_id', $user->id);
+                TextInput::make('isi')
+                ->label('Link Dokumen Laporan')
+                ->placeholder('Tempel link Google Docs / Drive di sini...')
+                ->url()
+                ->required()
+                ->suffixIcon('heroicon-o-link')
+                ->helperText('Masukkan link dokumen laporan mingguan (contoh: https://docs.google.com/...).'),
+        
 
-                            // Jika edit dan ada record, pastikan mahasiswa record ini ada di options
-                            if ($record && $record->mahasiswa_id) {
-                                $query->orWhere('id', $record->mahasiswa_id);
-                            }
-
-                            return $query->pluck('name', 'id');
-                        }
-
-                        if ($user->hasRole('super_admin')) {
-                            return \App\Models\User::whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'))
-                                ->pluck('name', 'id');
-                        }
-
-                        return [];
-                    })
-                    ->searchable()
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->preload(),
-
-                Select::make('dosen_id')
-                    ->label('Dosen Pembimbing')
-                    ->relationship(
-                        name: 'dosen',
-                        titleAttribute: 'name',
-                        modifyQueryUsing: fn($query) =>
-                        $query->whereHas('roles', fn($q) => $q->where('name', 'dosen'))
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->disabled(fn() => $user->hasRole('mahasiswa'))
-                    ->default(function () use ($user) {
-                        if ($user->hasRole('mahasiswa') && $user->dosen_pembimbing_id) {
-                            return $user->dosen_pembimbing_id;
-                        }
-                        return null;
-                    })
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->dehydrated(true), // ✅ agar tetap disimpan walau disabled
-
-                FileUpload::make('dokumen')
-                    ->label('Upload Dokumen')
-                    ->disk('public')
-                    ->directory('laporan-dokumen')
-                    ->preserveFilenames()
-                    ->acceptedFileTypes(['application/pdf'])
-                    ->maxSize(10240) // 10MB
-                    ->helperText('Format: PDF, Maksimal 10MB')
-                    ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->required(),
-
-                Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'disetujui' => 'Disetujui',
-                        'revisi' => 'Revisi',
-                    ])
-                    ->default(fn() => $user->hasRole('mahasiswa') ? 'pending' : 'pending')
-                    ->disabled(fn() => $user->hasRole('mahasiswa')) // mahasiswa tidak bisa ubah
-                    ->visible(fn() => true),
-
-                Select::make('status_dosen')
-                    ->label('Status Proses')
-                    ->options([
-                        'revisi' => '🔄 Butuh Revisi',
-                        'review' => '👀 Dalam Review',
-                        'fix' => '✅ Sudah Fix',
-                        'acc' => '🎉 Diterima (ACC)',
-                        'tolak' => '❌ Ditolak',
-                        'selesai' => '🏁 Selesai',
-                    ])
-                    ->default('review')
-                    ->placeholder('Pilih status proses')
-                    ->visible(false)
-                    ->columnSpan(1),
 
                 Textarea::make('komentar')
                     ->label('Komentar')
                     ->rows(4)
                     ->placeholder('Tambahkan komentar untuk laporan ini...')
-                    ->visible(fn() => $user->hasRole('dosen') || $user->hasRole('super_admin'))
+                    ->disabled(fn() => auth()->user()?->hasRole('mahasiswa'))
+                    ->visible(true)
                     ->nullable(),
-            ]);
+                ];
+                     if ($user->hasAnyRole(['dosen', 'super_admin'])) {
+                        $componenents[] = Select::make('status')
+                            ->label('Status')
+                            ->options([
+                                'pending' => 'Pending',
+                                'disetujui' => 'Disetujui',
+                                'revisi' => 'Revisi',
+                            ])
+                            ->default('pending');
+        }
+
+        return $schema->components($componenents);
     }
 }

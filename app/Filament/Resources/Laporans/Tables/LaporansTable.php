@@ -12,6 +12,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Columns\BadgeColumn;
 
 class LaporansTable
 {
@@ -63,13 +64,19 @@ class LaporansTable
                     ->label('Jenis')
                     ->sortable(),
 
-                TextColumn::make('status')
-                    ->badge()
+                BadgeColumn::make('status')
+                    ->label('Status')
                     ->colors([
                         'warning' => 'pending',
                         'success' => 'disetujui',
                         'danger' => 'ditolak',
-                    ]),
+                    ])
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'pending' => 'Pending',
+                        'disetujui' => 'Disetujui',
+                        'ditolak' => 'Ditolak',
+                        default => $state ?? 'Pending',
+                    }),
 
                 TextColumn::make('tanggal_mulai')
                     ->label('Mulai')
@@ -92,13 +99,7 @@ class LaporansTable
                     ->visible(fn() => $user->hasRole('mahasiswa')),
             ])
             ->recordActions([
-                Action::make('preview_dokumen')
-                    ->label('Preview')
-                    ->icon('heroicon-o-eye')
-                    ->color('info')
-                    ->url(fn($record) => $record->dokumen ? asset('storage/' . $record->dokumen) : null)
-                    ->openUrlInNewTab()
-                    ->visible(fn($record) => !empty($record->dokumen)),
+                
                 EditAction::make()
                     ->visible(fn($record) => $record->status !== 'disetujui'),
                 DeleteAction::make()
