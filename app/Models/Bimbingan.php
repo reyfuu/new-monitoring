@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Jobs\SendBimbinganBaruEmail;
+use App\Jobs\SendBimbinganStatusEmail;
 
 class Bimbingan extends Model
 {
@@ -48,6 +50,27 @@ class Bimbingan extends Model
             if ($bimbingan->user_id) {
                 $bimbingan->pertemuan_ke = static::where('user_id', $bimbingan->user_id)
                     ->count() + 1;
+            }
+        });
+
+        // Kirim email ke dosen ketika bimbingan baru dibuat
+        static::created(function ($bimbingan) {
+            SendBimbinganBaruEmail::dispatch($bimbingan);
+        });
+
+        // Kirim email ke mahasiswa ketika status diubah
+        static::updated(function ($bimbingan) {
+            // Cek apakah status berubah ke 'disetujui' atau 'ditolak'
+            if ($bimbingan->isDirty('status')) {
+                $newStatus = strtolower(trim($bimbingan->status));
+                
+                if (in_array($newStatus, ['disetujui', 'ditolak'])) {
+                    SendBimbinganStatusEmail::dispatch(
+                        $bimbingan,
+                        $newStatus,
+                        $bimbingan->komentar
+                    );
+                }
             }
         });
         
