@@ -64,6 +64,18 @@ class LaporansTable
                     ->label('Jenis')
                     ->sortable(),
 
+                TextColumn::make('dokumen')
+                    ->label('Dokumen')
+                    ->formatStateUsing(function ($state) {
+                        if (filter_var($state, FILTER_VALIDATE_URL)) {
+                            return "<a href='{$state}' target='_blank' class='text-primary-600 underline'>Buka Dokumen</a>";
+                        }
+                        return e(\Illuminate\Support\Str::limit($state, 80));
+                    })
+                    ->html()
+                    ->searchable()
+                    ->wrap(),
+
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([

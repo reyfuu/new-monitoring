@@ -98,7 +98,7 @@ class LaporanForm
 
                 
 
-                TextInput::make('isi')
+                TextInput::make('dokumen')
                 ->label('Link Dokumen Laporan')
                 ->placeholder('Tempel link Google Docs / Drive di sini...')
                 ->url()

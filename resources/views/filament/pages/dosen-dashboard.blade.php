@@ -453,9 +453,9 @@
             new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Review', 'Ditolak', 'Disetujui'],
+                    labels: ['Review', 'Revisi', 'Disetujui'],
                     datasets: [{
-                        data: [statusData.review, statusData.ditolak, statusData.disetujui],
+                        data: [statusData.review, statusData.revisi, statusData.disetujui],
                         backgroundColor: [
                             '#f59e0b',
                             '#ef4444',

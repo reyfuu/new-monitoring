@@ -62,7 +62,8 @@ class UserForm
            
 
             // 🧍 Nama
-            TextInput::make('nama')
+            TextInput::make('name')
+                ->label('Nama Lengkap')
                 ->required()
                 ->maxLength(100)
                 ->placeholder('Nama lengkap'),
