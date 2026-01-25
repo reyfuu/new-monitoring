@@ -64,7 +64,7 @@ class Bimbingan extends Model
             if ($bimbingan->isDirty('status')) {
                 $newStatus = strtolower(trim($bimbingan->status));
                 
-                if (in_array($newStatus, ['disetujui', 'ditolak'])) {
+                if (in_array($newStatus, ['disetujui', 'revisi'])) {
                     SendBimbinganStatusEmail::dispatch(
                         $bimbingan,
                         $newStatus,

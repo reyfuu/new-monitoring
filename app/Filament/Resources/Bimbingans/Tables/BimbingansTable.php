@@ -101,16 +101,14 @@ class BimbingansTable
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
-                        'warning' => 'pending',
-                        'success' => 'approved',
-                        'danger' => 'rejected',
-                        'primary' => 'completed',
+                        'warning' => 'review',
+                        'success' => 'disetujui',
+                        'danger' => 'revisi',
                     ])
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
-                        'completed' => 'Completed',
+                        'review' => 'Review',
+                        'disetujui' => 'Disetujui',
+                        'revisi' => 'Revisi',
                         default => $state,
                     }),
 
@@ -159,10 +157,9 @@ class BimbingansTable
                 // Filter Status - Admin
                 SelectFilter::make('status')
                     ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
-                        'completed' => 'Completed',
+                        'review' => 'Review',
+                        'disetujui' => 'Disetujui',
+                        'revisi' => 'Revisi',
                     ])
                     ->visible($user->hasRole('super_admin')),
 

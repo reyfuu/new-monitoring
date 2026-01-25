@@ -45,7 +45,7 @@ class KaprodiDashboard extends Page
         // Bimbingan stats
         $totalBimbingan = Bimbingan::where('status', 'disetujui')->count();
         $bimbinganSelesai = Bimbingan::whereIn('status', ['disetujui'])->count();
-        $bimbinganReview = Bimbingan::where('status', 'pending')->orWhereNull('status')->count();
+        $bimbinganReview = Bimbingan::where('status', 'review')->orWhereNull('status')->count();
 
         // Mahasiswa On Track (punya bimbingan dengan status selesai)
         $mahasiswaOnTrack = User::role('mahasiswa')

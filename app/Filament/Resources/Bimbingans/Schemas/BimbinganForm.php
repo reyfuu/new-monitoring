@@ -116,17 +116,17 @@ class BimbinganForm
                         Select::make('status')
                             ->label('Status Bimbingan')
                             ->options([
-                                'menunggu' => 'Menunggu persetujuan',
+                                'review' => 'Review',
                                 'disetujui' => 'Disetujui',
                                 'revisi' => 'Revisi',
                             ])
-                            ->default('pending')
+                            ->default('review')
                             ->required()
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
                             ->columnSpanFull(),
 
                         Hidden::make('status')
-                            ->default('pending')
+                            ->default('review')
                             ->visible($user->hasRole('mahasiswa')),
 
                         // -------------------- KOMENTAR --------------------
