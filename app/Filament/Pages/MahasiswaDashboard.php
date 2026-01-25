@@ -73,29 +73,29 @@ class MahasiswaDashboard extends Page
                 ->count();
         }
 
-        // Bimbingan menunggu review (status = pending)
+        // Bimbingan menunggu review (status = review)
         // Untuk magang: ambil dari laporan mingguan
         // Untuk skripsi: ambil dari bimbingan
         $bimbinganMenunggu = 0;
         
         if ($laporanMagang) {
-            // Jika magang, hitung dari laporan mingguan yang pending
+            // Jika magang, hitung dari laporan mingguan yang review
             $bimbinganMenunggu += LaporanMingguan::where('mahasiswa_id', $user->id)
-                ->where('status', 'pending')
+                ->where('status', 'review')
                 ->count();
         }
         
         if ($laporanSkripsi) {
-            // Jika skripsi, hitung dari bimbingan yang pending
+            // Jika skripsi, hitung dari bimbingan yang review
             $bimbinganMenunggu += Bimbingan::where('user_id', $user->id)
-                ->where('status', 'pending')
+                ->where('status', 'review')
                 ->count();
         }
         
         // Jika tidak ada laporan magang atau skripsi, default ke bimbingan
         if (!$laporanMagang && !$laporanSkripsi) {
             $bimbinganMenunggu = Bimbingan::where('user_id', $user->id)
-                ->where('status', 'pending')
+                ->where('status', 'review')
                 ->count();
         }
 

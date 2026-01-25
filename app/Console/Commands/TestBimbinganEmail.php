@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 class TestBimbinganEmail extends Command
 {
-    protected $signature = 'test:bimbingan-email {type=baru : Type of email (baru/disetujui/ditolak)}';
+    protected $signature = 'test:bimbingan-email {type=baru : Type of email (baru/disetujui/revisi)}';
 
     protected $description = 'Test sending bimbingan email notifications';
 
@@ -43,9 +43,9 @@ class TestBimbinganEmail extends Command
                 $this->info("✅ Job dispatched! Email akan dikirim ke: {$bimbingan->mahasiswa?->email}");
                 break;
 
-            case 'ditolak':
-                $this->info('📤 Mengirim email "Status Ditolak" ke mahasiswa...');
-                SendBimbinganStatusEmail::dispatch($bimbingan, 'ditolak', 'Mohon perbaiki bagian metodologi penelitian.');
+            case 'revisi':
+                $this->info('📤 Mengirim email "Status Revisi" ke mahasiswa...');
+                SendBimbinganStatusEmail::dispatch($bimbingan, 'revisi', 'Mohon perbaiki bagian metodologi penelitian.');
                 $this->info("✅ Job dispatched! Email akan dikirim ke: {$bimbingan->mahasiswa?->email}");
                 break;
 

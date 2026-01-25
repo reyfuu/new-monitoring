@@ -58,15 +58,15 @@ class LaporanMingguansTable
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
-                        'warning' => 'pending',
+                        'warning' => 'review',
                         'success' => 'disetujui',
                         'danger' => 'revisi',
                     ])
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'pending' => 'Pending',
+                        'review' => 'Review',
                         'disetujui' => 'Disetujui',
                         'revisi' => 'Revisi',
-                        default => $state ?? 'Pending',
+                        default => $state ?? 'Review',
                     }),
 
                 TextColumn::make('created_at')
@@ -77,7 +77,7 @@ class LaporanMingguansTable
             ->filters([
                 SelectFilter::make('status')
                     ->options([
-                        'pending' => 'Pending',
+                        'review' => 'Review',
                         'disetujui' => 'Disetujui',
                         'revisi' => 'Revisi',
                     ]),
@@ -97,7 +97,7 @@ class LaporanMingguansTable
                         Select::make('status')
                             ->label('Status')
                             ->options([
-                                'pending' => 'Pending',
+                                'review' => 'Review',
                                 'disetujui' => 'Disetujui',
                                 'revisi' => 'Revisi',
                             ])

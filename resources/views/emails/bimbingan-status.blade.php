@@ -28,8 +28,8 @@
         .header.disetujui {
             border-bottom: 2px solid #10b981;
         }
-        .header.ditolak {
-            border-bottom: 2px solid #ef4444;
+        .header.revisi {
+            border-bottom: 2px solid #f59e0b;
         }
         .header h1 {
             margin: 0;
@@ -38,8 +38,8 @@
         .header.disetujui h1 {
             color: #10b981;
         }
-        .header.ditolak h1 {
-            color: #ef4444;
+        .header.revisi h1 {
+            color: #f59e0b;
         }
         .status-badge {
             display: inline-block;
@@ -53,9 +53,9 @@
             background-color: #d1fae5;
             color: #065f46;
         }
-        .status-badge.ditolak {
-            background-color: #fee2e2;
-            color: #991b1b;
+        .status-badge.revisi {
+            background-color: #fef3c7;
+            color: #92400e;
         }
         .content {
             margin-bottom: 20px;
@@ -112,10 +112,10 @@
             @if($status === 'disetujui')
                 <h1>✅ Bimbingan Disetujui</h1>
             @else
-                <h1>❌ Bimbingan Ditolak</h1>
+                <h1>📝 Bimbingan Perlu Revisi</h1>
             @endif
             <span class="status-badge {{ $status }}">
-                {{ $status === 'disetujui' ? 'DISETUJUI' : 'DITOLAK' }}
+                {{ $status === 'disetujui' ? 'DISETUJUI' : 'REVISI' }}
             </span>
         </div>
 
@@ -154,7 +154,7 @@
             @if($status === 'disetujui')
                 <p>Selamat! Bimbingan Anda telah disetujui. Silakan lanjutkan ke tahap berikutnya.</p>
             @else
-                <p>Mohon perhatikan komentar dari dosen dan ajukan bimbingan perbaikan jika diperlukan.</p>
+                <p>Mohon perhatikan komentar dari dosen dan lakukan perbaikan sesuai arahan.</p>
             @endif
         </div>
 

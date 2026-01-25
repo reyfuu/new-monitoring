@@ -80,11 +80,11 @@ class LaporanMingguanForm
             $components[] = Select::make('status')
                 ->label('Status')
                 ->options([
-                    'pending' => 'Pending',
+                    'review' => 'Review',
                     'disetujui' => 'Disetujui',
                     'revisi' => 'Revisi',
                 ])
-                ->default('pending');
+                ->default('review');
         }
 
         return $schema->components($components);

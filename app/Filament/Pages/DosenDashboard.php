@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\LaporanMingguan;
 use Filament\Pages\Page;
 use App\Models\User;
 use App\Models\Bimbingan;
@@ -42,6 +43,20 @@ class DosenDashboard extends Page
 
         // Total Mahasiswa bimbingan
         $totalMahasiswa = $user->mahasiswaBimbingan()->count();
+        // hanya jika total mahasiswa bimbingan kosong
+        if ($totalMahasiswa == 0) {
+            // ambil mahasiswa_id dari kedua tabel dan gabungkan dengan unique
+            $mahasiswaFromLaporanMingguan = LaporanMingguan::where('dosen_id', $user->id)
+                ->pluck('mahasiswa_id');
+            $mahasiswaFromBimbingan = Bimbingan::where('dosen_id', $user->id)
+                ->pluck('user_id');
+            
+            // Gabungkan dan hitung unique
+            $totalMahasiswa = $mahasiswaFromLaporanMingguan
+                ->merge($mahasiswaFromBimbingan)
+                ->unique()
+                ->count();
+        }
 
         // Bimbingan stats dari mahasiswa bimbingan
         $bimbinganQuery = Bimbingan::where('dosen_id', $user->id)
@@ -51,9 +66,9 @@ class DosenDashboard extends Page
 
         $totalBimbingan = (clone $bimbinganQuery)->count();
 
-        // Bimbingan perlu review (status = pending)
+        // Bimbingan perlu review (status = review)
         $bimbinganReview = (clone $bimbinganQuery)
-            ->where('status', 'pending')
+            ->where('status', 'review')
             ->count();
 
         // Bimbingan selesai (status = disetujui)
@@ -64,13 +79,28 @@ class DosenDashboard extends Page
         // Laporan stats
         $totalLaporan = Laporan::where('dosen_id', $user->id)->count();
 
-        // Pie chart data - Status Bimbingan (dari field 'status')
-        $statusBimbinganData = [
-            'review' => Bimbingan::where('dosen_id', $user->id)->where('status', 'pending')->count(),
-            'ditolak' => Bimbingan::where('dosen_id', $user->id)->where('status', 'ditolak')->count(),
+        // Pie chart data - Status Bimbingan (gabungan dari bimbingan + laporan mingguan)
+        // Status dari tabel bimbingans
+        $bimbinganStatus = [
+            'review' => Bimbingan::where('dosen_id', $user->id)->where('status', 'review')->count(),
+            'revisi' => Bimbingan::where('dosen_id', $user->id)->where('status', 'revisi')->count(),
             'disetujui' => Bimbingan::where('dosen_id', $user->id)->where('status', 'disetujui')->count(),
         ];
-
+        
+        // Status dari tabel laporan_mingguans
+        $laporanMingguanStatus = [
+            'review' => \App\Models\LaporanMingguan::where('dosen_id', $user->id)->where('status', 'review')->count(),
+            'revisi' => \App\Models\LaporanMingguan::where('dosen_id', $user->id)->where('status', 'revisi')->count(),
+            'disetujui' => \App\Models\LaporanMingguan::where('dosen_id', $user->id)->where('status', 'disetujui')->count(),
+        ];
+        
+        // Gabungkan dengan menjumlahkan masing-masing status
+        $statusBimbinganData = [
+            'review' => $bimbinganStatus['review'] + $laporanMingguanStatus['review'],
+            'revisi' => $bimbinganStatus['revisi'] + $laporanMingguanStatus['revisi'],
+            'disetujui' => $bimbinganStatus['disetujui'] + $laporanMingguanStatus['disetujui'],
+        ];
+        
         // Pie chart data - Jenis Laporan (proposal, magang, skripsi)
         $jenisLaporanData = [
             'proposal' => Laporan::where('dosen_id', $user->id)->where('type', 'proposal')->count(),

@@ -21,7 +21,7 @@ class BimbinganStatusMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $statusLabel = $this->status === 'disetujui' ? 'Disetujui' : 'Ditolak';
+        $statusLabel = $this->status === 'disetujui' ? 'Disetujui' : 'Revisi';
         
         return new Envelope(
             subject: 'Status Bimbingan Anda: ' . $statusLabel,
