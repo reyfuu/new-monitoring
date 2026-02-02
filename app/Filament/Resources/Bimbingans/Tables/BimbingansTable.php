@@ -112,6 +112,14 @@ class BimbingansTable
                         default => $state,
                     }),
 
+                // REVISION COUNT
+                TextColumn::make('revision_count')
+                    ->label('Revisi Ke-')
+                    ->badge()
+                    ->color('info')
+                    ->formatStateUsing(fn($state) => $state > 0 ? "#{$state}" : '-')
+                    ->toggleable(),
+
                 // ISI
                 TextColumn::make('isi')
                     ->label('Isi Pertemuan')

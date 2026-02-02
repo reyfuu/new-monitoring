@@ -23,6 +23,7 @@ class Bimbingan extends Model
         'isi',
         'type',
         'komentar',
+        'revision_count',
     ];
 
     protected $casts = [
@@ -56,6 +57,37 @@ class Bimbingan extends Model
         // Kirim email ke dosen ketika bimbingan baru dibuat
         static::created(function ($bimbingan) {
             SendBimbinganBaruEmail::dispatch($bimbingan);
+        });
+
+        // Auto-update status dan revision_count ketika mahasiswa mengedit bimbingan revisi
+        static::updating(function ($bimbingan) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+            
+            // Hanya berlaku jika user adalah mahasiswa
+            if ($user && $user->hasRole('mahasiswa')) {
+                $originalStatus = strtolower(trim($bimbingan->getOriginal('status') ?? ''));
+                
+                // Jika status sebelumnya 'revisi' dan ada perubahan konten
+                if ($originalStatus === 'revisi') {
+                    $contentFields = ['topik', 'isi', 'tanggal'];
+                    $hasContentChange = false;
+                    
+                    foreach ($contentFields as $field) {
+                        if ($bimbingan->isDirty($field)) {
+                            $hasContentChange = true;
+                            break;
+                        }
+                    }
+                    
+                    if ($hasContentChange) {
+                        // Increment revision count
+                        $bimbingan->revision_count = ($bimbingan->revision_count ?? 0) + 1;
+                        // Ubah status ke review
+                        $bimbingan->status = 'review';
+                    }
+                }
+            }
         });
 
         // Kirim email ke mahasiswa ketika status diubah

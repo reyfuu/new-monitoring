@@ -11,6 +11,9 @@ services:
             - ./:/var/www
         networks:
             - monitoring-network
+        dns:
+            - 8.8.8.8
+            - 8.8.4.4
 
     webserver:
         image: nginx:alpine
@@ -25,6 +28,23 @@ services:
             - monitoring-network
         depends_on:
             - app
+
+    queue:
+        image: monitoring-app
+        container_name: monitoring-queue
+        restart: unless-stopped
+        working_dir: /var/www
+        command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+        volumes:
+            - ./:/var/www
+        networks:
+            - monitoring-network
+        dns:
+            - 8.8.8.8
+            - 8.8.4.4
+        depends_on:
+            - app
+            - db
 
     db:
         image: mysql:8.0
