@@ -90,6 +90,13 @@ class LaporansTable
                         default => $state ?? 'Pending',
                     }),
 
+            //    TextColumn::make('revision_count')
+            //         ->label('Revisi Ke-')
+            //         ->badge()
+            //         ->color('info')
+            //         ->formatStateUsing(fn($state) => $state > 0 ? "#{$state}" : '-')
+            //         ->toggleable(),
+
                 TextColumn::make('tanggal_mulai')
                     ->label('Mulai')
                     ->date(),

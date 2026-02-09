@@ -25,13 +25,13 @@ class BimbinganResource extends Resource
     protected static ?string $model = Bimbingan::class;
 
     // BimbinganResource.php
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
+    protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
     protected static ?string $modelLabel = 'Bimbingan';
     protected static ?string $pluralModelLabel = 'Daftar Bimbingan';
     protected static ?string $navigationLabel = 'Bimbingan';
     // protected static ?string $navigationGroup = 'Akademik';
-    protected static string|\UnitEnum|null $navigationGroup = 'Laporan';
+    // protected static string|BackedEnum|null $navigationGroup = 'Laporan';
 
     public static function form(Schema $schema): Schema
     {
@@ -46,6 +46,36 @@ class BimbinganResource extends Resource
             'create' => CreateBimbingan::route('/create'),
             'edit' => EditBimbingan::route('/{record}/edit'),
         ];
+    }
+
+    public  function afterSave(): void
+    {
+        // Logic setelah menyimpan record Bimbingan
+        $bimbingan = $this->record;
+        $oldStatus = $bimbingan->getOriginal('status');
+        $newStatus = $bimbingan->status;
+
+        if ($oldStatus === $newStatus) {
+            return;
+        }
+
+         if (in_array($newStatus, ['direview', 'revisi'])) {
+        $student = $bimbingan->mahasiswa;
+        
+        if ($student) {
+            $message = match ($newStatus) {
+                'direview' => 'Dosen telah mereview laporan bimbingan Anda.',
+                'revisi' => 'Dosen meminta revisi pada laporan bimbingan Anda.',
+                default => 'Status bimbingan diperbarui.'
+            };
+            
+
+            $student->notify(new BimbinganReviewed(
+                $message,
+                url("/filament/Resources/Bimbingans/{$bimbingan->id}")
+            ));
+        }
+    }
     }
 
     public static function table(Table $table): Table

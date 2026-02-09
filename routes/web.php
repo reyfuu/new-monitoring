@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
+use App\Http\Controllers\BimbinganController;
 
 
 Route::get('/', function () {
@@ -29,6 +30,8 @@ Route::get('/view-pdf/{filename)',function ($filename){
 return Storage::disk('local')->response($path);
 
 })->name('pdf.view')->middleware('auth');
+
+Route::get('/bimbingans/{bimbingan}', [BimbinganController::class, 'show'])->name('bimbingans.show');
 
 
 

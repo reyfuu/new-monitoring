@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Bimbingan</title>
+    <title>Status Laporan</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -110,9 +110,9 @@
     <div class="container">
         <div class="header {{ $status }}">
             @if($status === 'disetujui')
-                <h1>✅ Bimbingan Disetujui</h1>
+                <h1>✅ Laporan Disetujui</h1>
             @else
-                <h1>📝 Bimbingan Perlu Revisi</h1>
+                <h1>📝 Laporan Perlu Revisi</h1>
             @endif
             <span class="status-badge {{ $status }}">
                 {{ $status === 'disetujui' ? 'DISETUJUI' : 'REVISI' }}
@@ -121,22 +121,13 @@
 
         <div class="content">
             <p>Halo <strong>{{ $mahasiswa->name }}</strong>,</p>
-            
-            <p>Bimbingan Anda telah ditinjau oleh dosen pembimbing dengan hasil:</p>
 
-            <div class="info-box">
-                <div class="info-label">Topik Bimbingan</div>
-                <div class="info-value">{{ $bimbingan->topik }}</div>
-            </div>
+            <p>Laporan Anda telah ditinjau oleh dosen pembimbing dengan hasil:</p>
 
-            <div class="info-box">
-                <div class="info-label">Jenis Bimbingan</div>
-                <div class="info-value">{{ ucfirst($bimbingan->type) }}</div>
-            </div>
 
             <div class="info-box">
                 <div class="info-label">Tanggal</div>
-                <div class="info-value">{{ $bimbingan->tanggal->format('d F Y') }}</div>
+                <div class="info-value">{{ now()->format('d F Y') }}</div>
             </div>
 
             <div class="info-box">
@@ -152,7 +143,7 @@
             @endif
 
             @if($status === 'disetujui')
-                <p>Selamat! Bimbingan Anda telah disetujui. Silakan lanjutkan ke tahap berikutnya.</p>
+                <p>Selamat! Laporan Anda telah disetujui.</p>
             @else
                 <p>Mohon perhatikan komentar dari dosen dan lakukan perbaikan sesuai arahan.</p>
             @endif

@@ -116,6 +116,11 @@ class LaporanForm
                     ->visible(true)
                     ->nullable(),
                 ];
+
+                // Hidden::make('status')
+                //         ->default('review')
+                //         ->visible($user->hasRole('mahasiswa'));
+
                      if ($user->hasAnyRole(['dosen', 'super_admin'])) {
                         $componenents[] = Select::make('status')
                             ->label('Status')
@@ -125,6 +130,7 @@ class LaporanForm
                                 'revisi' => 'Revisi',
                             ])
                             ->default('pending');
+                            
         }
 
         return $schema->components($componenents);

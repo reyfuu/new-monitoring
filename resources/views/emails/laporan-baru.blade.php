@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bimbingan Baru</title>
+    <title>Laporan Baru</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -65,40 +65,26 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Bimbingan Baru</h1>
+            <h1>📚 Laporan Baru</h1>
         </div>
 
         <div class="content">
             <p>Yth. <strong>{{ $dosen->name }}</strong>,</p>
-            
-            <p>Anda menerima permintaan bimbingan baru dari mahasiswa:</p>
+
+            <p>Anda menerima permintaan laporan baru dari mahasiswa:</p>
 
             <div class="info-box">
                 <div class="info-label">Nama Mahasiswa</div>
                 <div class="info-value">{{ $mahasiswa->name }}</div>
             </div>
 
-            <div class="info-box">
-                <div class="info-label">Jenis Bimbingan</div>
-                <div class="info-value">{{ ucfirst($bimbingan->type) }}</div>
-            </div>
-
-            <div class="info-box">
-                <div class="info-label">Topik</div>
-                <div class="info-value">{{ $bimbingan->topik }}</div>
-            </div>
 
             <div class="info-box">
                 <div class="info-label">Tanggal</div>
-                <div class="info-value">{{ $bimbingan->tanggal->format('d F Y') }}</div>
+                <div class="info-value">{{ now()->format('d F Y') }}</div>
             </div>
 
-            <div class="info-box">
-                <div class="info-label">Isi/Rincian</div>
-                <div class="info-value">{{ $bimbingan->isi }}</div>
-            </div>
-
-            <p>Silakan login ke sistem untuk memberikan respons pada bimbingan ini.</p>
+            <p>Silakan login ke sistem untuk memberikan respons pada laporan ini.</p>
         </div>
 
         <div class="footer">
