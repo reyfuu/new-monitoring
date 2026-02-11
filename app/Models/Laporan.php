@@ -23,7 +23,6 @@ class Laporan extends Model
         'status_dosen',
         'type',
         'komentar',
-        'revision_count',
     ];
 
     protected static function boot ()

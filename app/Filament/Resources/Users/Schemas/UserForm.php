@@ -38,10 +38,7 @@ class UserForm
             TextInput::make('npm')
                 ->label('NPM')
                 ->required(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
-                                ->visible(function ($get) {
-                    $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
-                    return in_array('mahasiswa', $roles);
-                })
+                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NPM mahasiswa'),
@@ -54,10 +51,7 @@ class UserForm
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NIDN dosen')
                 ->required(fn ($get) => in_array('dosen', $get('selected_role_names') ?? []))
-                ->visible(function ($get) {
-                    $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
-                    return in_array('dosen', $roles);
-                }),
+                ->visible(fn ($get) => in_array('dosen', $get('selected_role_names') ?? [])),
 
            
 
@@ -88,11 +82,13 @@ class UserForm
                 ->confirmed(),
 
             // 🔒 Konfirmasi Password
-            TextInput::make('konfirmasi password')
+            TextInput::make('password_confirmation')
                 ->password()
+                ->label('Konfirmasi Password')
                 ->required(fn($operation) => $operation === 'create')
                 ->dehydrated(false)
                 ->placeholder('Konfirmasi password'),
+
 
             // ⚙️ Status
             Select::make('status')
