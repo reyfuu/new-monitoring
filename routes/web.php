@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
 use App\Http\Controllers\BimbinganController;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 
 Route::get('/', function () {
@@ -18,6 +19,11 @@ Route::get('/', function () {
 // Redirect /admin ke dashboard (jaga-jaga)
 Route::get('/admin', function () {
     return redirect('/dashboard');
+});
+
+Route::get("/get-updates", function () {
+  $updates = Telegram::getUpdates();
+  return $updates;
 });
 
 Route::get('/view-pdf/{filename)',function ($filename){

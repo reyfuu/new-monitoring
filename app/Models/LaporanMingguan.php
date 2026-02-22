@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Jobs\SendLaporanMingguanBaruEmail;
 use App\Jobs\SendLaporanMingguanStatusEmail;
+use App\Jobs\SendLaporanMingguanTelegram;
+use App\Jobs\SendLaporanMingguanStatusTelegram;
 
 class LaporanMingguan extends Model
 {
@@ -44,6 +46,7 @@ class LaporanMingguan extends Model
 
         static::created(function ($laporanMingguan) {
             SendLaporanMingguanBaruEmail::dispatch($laporanMingguan);
+            SendLaporanMingguanTelegram::dispatch($laporanMingguan);
         });
 
         static::updating(function($laporanMingguan){
@@ -72,16 +75,13 @@ class LaporanMingguan extends Model
             }
         });
 
-        static::updated(function ($laporanMingguan){
-
-            if($laporanMingguan->isDirty('status')){
+        static::updated(function ($laporanMingguan) {
+            if ($laporanMingguan->isDirty('status')) {
                 $newStatus = strtolower(trim($laporanMingguan->status));
 
-                if(in_array($newStatus, ['disetujui','revisi'])){
-                    SendLaporanMingguanStatusEmail::dispatch(
-                        $laporanMingguan,
-                        $newStatus,
-                    );
+                if (in_array($newStatus, ['disetujui', 'revisi'])) {
+                    SendLaporanMingguanStatusEmail::dispatch($laporanMingguan, $newStatus);
+                    SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, $newStatus);
                 }
             }
         });

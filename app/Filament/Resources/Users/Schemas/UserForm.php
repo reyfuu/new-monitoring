@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Actions\Action;
 use Spatie\Permission\Models\Role;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -41,7 +42,10 @@ class UserForm
                 ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
-                ->placeholder('Masukkan NPM mahasiswa'),
+                ->placeholder('Masukkan NPM mahasiswa')
+                ->validationMessages([
+                    'required' => 'NPM wajib diisi untuk mahasiswa.',
+                ]),
 
 
 
@@ -51,7 +55,10 @@ class UserForm
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NIDN dosen')
                 ->required(fn ($get) => in_array('dosen', $get('selected_role_names') ?? []))
-                ->visible(fn ($get) => in_array('dosen', $get('selected_role_names') ?? [])),
+                ->visible(fn ($get) => in_array('dosen', $get('selected_role_names') ?? []))
+                ->validationMessages([
+                    'required' => 'NIDN wajib diisi untuk dosen.',
+                ]),
 
            
 
@@ -79,7 +86,12 @@ class UserForm
                 ->minLength(8)
                 ->maxLength(255)
                 ->placeholder('Password minimal 8 karakter')
-                ->confirmed(),
+                ->confirmed()
+                ->validationMessages([
+                    'required'  => 'Password wajib diisi saat membuat user baru.',
+                    'min'       => 'Password minimal 8 karakter.',
+                    'confirmed' => 'Konfirmasi password tidak cocok.',
+                ]),
 
             // 🔒 Konfirmasi Password
             TextInput::make('password_confirmation')

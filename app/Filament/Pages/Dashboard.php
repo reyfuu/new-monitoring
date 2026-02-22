@@ -78,7 +78,7 @@ class Dashboard extends Page
             // Bimbingan stats (dari field 'status')
             $totalBimbingan = Bimbingan::count();
             $bimbinganSelesai = Bimbingan::where('status', 'disetujui')->count();
-            $bimbinganReview = Bimbingan::where('status', 'pending')->count();
+            $bimbinganReview = Bimbingan::where('status', 'review')->count();
 
             // Mahasiswa On Track (punya bimbingan dengan status disetujui)
             $mahasiswaOnTrack = User::role('mahasiswa')

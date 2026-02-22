@@ -90,6 +90,9 @@ class LaporansTable
                         default => $state ?? 'Pending',
                     }),
 
+
+
+
             //    TextColumn::make('revision_count')
             //         ->label('Revisi Ke-')
             //         ->badge()
