@@ -4,16 +4,13 @@ namespace App\Jobs;
 
 use App\Mail\LaporanMingguanBaruMail;
 use App\Models\LaporanMingguan;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
-class SendLaporanMingguanBaruEmail implements ShouldQueue
+class SendLaporanMingguanBaruEmail
 {
-    use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
+    use Dispatchable;
 
     public function __construct(
         public LaporanMingguan $laporanMingguan
@@ -24,7 +21,11 @@ class SendLaporanMingguanBaruEmail implements ShouldQueue
         $dosen = $this->laporanMingguan->dosen;
 
         if ($dosen && $dosen->email) {
-            Mail::to($dosen->email)->send(new LaporanMingguanBaruMail($this->laporanMingguan));
+            try {
+                Mail::to($dosen->email)->send(new LaporanMingguanBaruMail($this->laporanMingguan));
+            } catch (\Exception $e) {
+                Log::error('Laporan Mingguan Baru Email failed: ' . $e->getMessage());
+            }
         }
     }
 }

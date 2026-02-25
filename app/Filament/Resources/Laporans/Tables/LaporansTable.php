@@ -79,15 +79,15 @@ class LaporansTable
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
-                        'warning' => 'pending',
+                        'warning' => 'review',
                         'success' => 'disetujui',
-                        'danger' => 'ditolak',
+                        'danger' => 'revisi',
                     ])
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'pending' => 'Pending',
+                        'review' => 'Review',
                         'disetujui' => 'Disetujui',
-                        'ditolak' => 'Ditolak',
-                        default => $state ?? 'Pending',
+                        'revisi' => 'Revisi',
+                        default => $state ?? 'Review',
                     }),
 
 

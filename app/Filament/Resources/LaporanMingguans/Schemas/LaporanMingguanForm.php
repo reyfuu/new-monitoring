@@ -49,6 +49,12 @@ class LaporanMingguanForm
                 })
                 ->placeholder('Masukkan nomor minggu (contoh: 1, 2, 3...)')
                 ->required()
+                ->unique(ignorable: fn ($record) => $record, modifyRuleUsing: fn ($rule, $record) => $rule->where('mahasiswa_id', $record ? $record->mahasiswa_id : auth()->id()))
+                ->validationMessages([
+                    'required' => 'Minggu ke- wajib diisi.',
+                    'numeric' => 'Minggu ke- harus berupa angka.',
+                    'unique' => 'Laporan untuk minggu ini sudah ada.',
+                ])
                 ->disabled(fn() => $user->hasRole('dosen'))
                 ->helperText('Masukkan angka minggu ke berapa (1-26, maks. 6 bulan)'),
 
@@ -61,6 +67,9 @@ class LaporanMingguanForm
                 )
                 ->searchable()
                 ->required()
+                ->validationMessages([
+                    'required' => 'Dosen pembimbing wajib dipilih.',
+                ])
                 ->disabled(fn() => $user->hasRole('dosen'))
                 ->placeholder('Pilih Dosen Pembimbing')
                 ->helperText('Pilih dosen pembimbing yang akan membimbing laporan mingguan Anda.'),
@@ -70,6 +79,10 @@ class LaporanMingguanForm
                 ->placeholder('Tempel link Google Docs / Drive di sini...')
                 ->url()
                 ->required()
+                ->validationMessages([
+                    'required' => 'Link dokumen wajib diisi.',
+                    'url' => 'Format link tidak valid.',
+                ])
                 ->disabled(fn() => $user->hasRole('dosen'))
                 ->suffixIcon('heroicon-o-link')
                 ->helperText('Masukkan link dokumen laporan mingguan (contoh: https://docs.google.com/...).'),
@@ -84,7 +97,13 @@ class LaporanMingguanForm
                     'disetujui' => 'Disetujui',
                     'revisi' => 'Revisi',
                 ])
-                ->default('review');
+                ->default('review')
+                ->required()
+                ->validationMessages([
+                    'required' => 'Status wajib dipilih.',
+                ]);
+
+            
         }
 
         return $schema->components($components);

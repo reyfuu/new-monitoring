@@ -4,15 +4,11 @@ namespace App\Jobs;
 
 use App\Models\Bimbingan;
 use App\Services\TelegramService;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
-class SendBimbinganStatusTelegram implements ShouldQueue
+class SendBimbinganStatusTelegram
 {
-    use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
+    use Dispatchable;
 
     public function __construct(
         public Bimbingan $bimbingan,
@@ -22,19 +18,32 @@ class SendBimbinganStatusTelegram implements ShouldQueue
 
     public function handle(TelegramService $telegram): void
     {
-        $mahasiswa = $this->bimbingan->mahasiswa;
-        $dosen     = $this->bimbingan->dosen;
+        $targetUser = null;
+        $title = "Status Bimbingan Diperbarui";
+        $emoji = "📌";
 
-        $emoji = $this->status === 'disetujui' ? '✅' : '🔄';
+        if (in_array($this->status, ['disetujui', 'revisi'])) {
+            $targetUser = $this->bimbingan->mahasiswa;
+            $emoji = $this->status === 'disetujui' ? '✅' : '🔄';
+        } elseif ($this->status === 'review') {
+            $targetUser = $this->bimbingan->dosen;
+            $title = "Update Revisi Bimbingan";
+            $emoji = "📥";
+        }
+
+        if (!$targetUser || !$targetUser->telegram_chat_id) {
+            return;
+        }
+
         $label = ucfirst($this->status);
 
-        $message = "{$emoji} <b>Status Bimbingan Diperbarui</b>\n\n"
-            . "👤 <b>Mahasiswa:</b> " . ($mahasiswa?->name ?? '-') . "\n"
-            . "👨‍🏫 <b>Dosen:</b> " . ($dosen?->name ?? '-') . "\n"
+        $message = "{$emoji} <b>{$title}</b>\n\n"
+            . "👤 <b>Mahasiswa:</b> " . ($this->bimbingan->mahasiswa?->name ?? '-') . "\n"
+            . "👨‍🏫 <b>Dosen:</b> " . ($this->bimbingan->dosen?->name ?? '-') . "\n"
             . "📌 <b>Topik:</b> " . $this->bimbingan->topik . "\n"
             . "📊 <b>Status:</b> {$label}\n"
             . ($this->komentar ? "💬 <b>Komentar:</b> " . $this->komentar : '');
 
-        $telegram->send($message);
+        $telegram->send($message, $targetUser->telegram_chat_id);
     }
 }

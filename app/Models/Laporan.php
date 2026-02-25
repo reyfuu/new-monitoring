@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Jobs\SendLaporanBaruEmail;
 use App\Jobs\SendLaporanStatusEmail;
-use App\Jobs\SendLaporanTelegram;
 use App\Jobs\SendLaporanStatusTelegram;
 
 class Laporan extends Model
@@ -42,21 +41,26 @@ class Laporan extends Model
                     $laporan->dosen_id = $user->dosen_pembimbing_id;
                 }
             }
+
+            if (empty($laporan->status)) {
+                $laporan->status = 'review';
+            }
         });
 
         static::created(function ($laporan) {
             SendLaporanBaruEmail::dispatch($laporan);
-            SendLaporanTelegram::dispatch($laporan);
+            SendLaporanStatusTelegram::dispatch($laporan, 'review');
         });
 
         static::updating(function ($laporan) {
+            \Illuminate\Support\Facades\Log::info("Laporan UPDATING Triggered: ID {$laporan->id}");
             $user = Auth::user();
 
             if ($user && $user->hasRole('mahasiswa')) {
                 $originalStatus = strtolower(trim($laporan->getOriginal('status') ?? ''));
 
                 if ($originalStatus == 'revisi') {
-                    $contentFields = ['judul','deskripsi'];
+                    $contentFields = ['judul', 'deskripsi', 'dokumen'];
                     $hasContentChanges = false;
 
                     foreach ($contentFields as $field) {
@@ -66,16 +70,21 @@ class Laporan extends Model
                         }
                     }
 
-        
+                    if ($hasContentChanges) {
+                        $laporan->status = 'review';
+                    }
                 }
             }
         });
 
         static::updated(function ($laporan) {
-            if ($laporan->isDirty('status')) {
+            \Illuminate\Support\Facades\Log::info("Laporan UPDATED Triggered: ID {$laporan->id}, Status: {$laporan->status}, WasChanged(status): " . ($laporan->wasChanged('status') ? 'YES' : 'NO'));
+            
+            if ($laporan->wasChanged('status')) {
                 $newStatus = strtolower(trim($laporan->status ?? ''));
+                \Illuminate\Support\Facades\Log::info("Laporan Status Hook Match: New Status: {$newStatus}");
 
-                if (in_array($newStatus, ['disetujui', 'revisi'])) {
+                if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
                     SendLaporanStatusEmail::dispatch($laporan, $newStatus, $laporan->komentar);
                     SendLaporanStatusTelegram::dispatch($laporan, $newStatus, $laporan->komentar);
                 }
@@ -85,12 +94,12 @@ class Laporan extends Model
 
     public function mahasiswa()
     {
-        return $this->belongsTo(User::class, 'mahasiswa_id')->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'));
+        return $this->belongsTo(User::class, 'mahasiswa_id');
     }
 
     public function dosen()
     {
-        return $this->belongsTo(User::class, 'dosen_id')->whereHas('roles', fn($q) => $q->where('name', 'dosen'));
+        return $this->belongsTo(User::class, 'dosen_id');
     }
 
     public function scopeByMahasiswa($query, $mahasiswaId)

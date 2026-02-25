@@ -136,8 +136,8 @@ class UserForm
                     $roles = Role::whereIn('id', (array) $get('roles'))->pluck('name')->toArray();
                     return in_array('mahasiswa', $roles);
                 })
-                ->placeholder('Pilih kategori mahasiswa')
-                ->helperText('Skripsi: Dashboard, Laporan, Bimbingan | Magang: Dashboard, Laporan Mingguan, Laporan'),
+                ->placeholder('Pilih kategori mahasiswa'),
+               
 
 
             Select::make('dosen_pembimbing_id')
@@ -161,6 +161,12 @@ class UserForm
                     return !in_array('mahasiswa', $roles);
                 })
                 ->placeholder('Pilih dosen pembimbing'),
+
+            TextInput::make('telegram_chat_id')
+                ->label('Telegram Chat ID')
+                ->placeholder('Masukkan ID Telegram (Personal)')
+                ->helperText('Gunakan bot @userinfobot untuk mendapatkan ID Telegram kamu.')
+                ->maxLength(50),
     
             ]);
 

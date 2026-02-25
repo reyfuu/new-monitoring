@@ -90,6 +90,9 @@ class BimbinganForm
                             ->label('Tanggal Bimbingan')
                             ->displayFormat('d/m/Y')
                             ->required()
+                            ->validationMessages([
+                                'required' => 'Tanggal bimbingan wajib diisi.',
+                            ])
                             ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                             ->default(now())
                             ->columnSpan(1),
@@ -99,6 +102,9 @@ class BimbinganForm
                             ->label('Topik Bimbingan')
                             ->maxLength(50)
                             ->required()
+                            ->validationMessages([
+                                'required' => 'Topik bimbingan wajib diisi.',
+                            ])
                             ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                             ->placeholder('Topik bimbingan')
                             ->columnSpanFull(),
@@ -109,6 +115,9 @@ class BimbinganForm
                             ->maxLength(255)
                             ->rows(3)
                             ->required()
+                            ->validationMessages([
+                                'required' => 'Isi bimbingan wajib diisi.',
+                            ])
                             ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                             ->columnSpanFull(),
 
@@ -135,6 +144,10 @@ class BimbinganForm
                             ->maxLength(100)
                             ->rows(2)
                             ->placeholder('Berikan komentar dan saran untuk mahasiswa')
+                            ->required(fn ($get) => $get('status') === 'revisi')
+                            ->validationMessages([
+                                'required' => 'Komentar wajib diisi jika status adalah Revisi.',
+                            ])
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
                             ->columnSpanFull(),
 

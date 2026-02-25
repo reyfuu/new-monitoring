@@ -48,36 +48,6 @@ class BimbinganResource extends Resource
         ];
     }
 
-    public  function afterSave(): void
-    {
-        // Logic setelah menyimpan record Bimbingan
-        $bimbingan = $this->record;
-        $oldStatus = $bimbingan->getOriginal('status');
-        $newStatus = $bimbingan->status;
-
-        if ($oldStatus === $newStatus) {
-            return;
-        }
-
-         if (in_array($newStatus, ['direview', 'revisi'])) {
-        $student = $bimbingan->mahasiswa;
-        
-        if ($student) {
-            $message = match ($newStatus) {
-                'direview' => 'Dosen telah mereview laporan bimbingan Anda.',
-                'revisi' => 'Dosen meminta revisi pada laporan bimbingan Anda.',
-                default => 'Status bimbingan diperbarui.'
-            };
-            
-
-            $student->notify(new BimbinganReviewed(
-                $message,
-                url("/filament/Resources/Bimbingans/{$bimbingan->id}")
-            ));
-        }
-    }
-    }
-
     public static function table(Table $table): Table
     {
         /** @var \App\Models\User $user */

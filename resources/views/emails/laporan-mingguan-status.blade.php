@@ -126,7 +126,7 @@
 
             <div class="info-box">
                 <div class="info-label">Tanggal</div>
-                <div class="info-value">{{ $laporanmingguan->week }}</div>
+                <div class="info-value">{{ $laporanMingguan->week }}</div>
             </div>
 
             <div class="info-box">

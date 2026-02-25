@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Jobs\SendBimbinganBaruEmail;
 use App\Jobs\SendBimbinganStatusEmail;
-use App\Jobs\SendBimbinganTelegram;
 use App\Jobs\SendBimbinganStatusTelegram;
 
 class Bimbingan extends Model
@@ -59,7 +58,7 @@ class Bimbingan extends Model
         // Kirim email + Telegram ke dosen ketika bimbingan baru dibuat
         static::created(function ($bimbingan) {
             SendBimbinganBaruEmail::dispatch($bimbingan);
-            SendBimbinganTelegram::dispatch($bimbingan);
+            SendBimbinganStatusTelegram::dispatch($bimbingan, 'review');
         });
 
         // Auto-update status dan revision_count ketika mahasiswa mengedit bimbingan revisi
@@ -95,10 +94,10 @@ class Bimbingan extends Model
 
         // Kirim email + Telegram ke mahasiswa ketika status diubah
         static::updated(function ($bimbingan) {
-            if ($bimbingan->isDirty('status')) {
+            if ($bimbingan->wasChanged('status')) {
                 $newStatus = strtolower(trim($bimbingan->status));
 
-                if (in_array($newStatus, ['disetujui', 'revisi'])) {
+                if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
                     SendBimbinganStatusEmail::dispatch($bimbingan, $newStatus, $bimbingan->komentar);
                     SendBimbinganStatusTelegram::dispatch($bimbingan, $newStatus, $bimbingan->komentar);
                 }

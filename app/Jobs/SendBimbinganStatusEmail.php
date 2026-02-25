@@ -4,16 +4,13 @@ namespace App\Jobs;
 
 use App\Mail\BimbinganStatusMail;
 use App\Models\Bimbingan;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
-class SendBimbinganStatusEmail implements ShouldQueue
+class SendBimbinganStatusEmail
 {
-    use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
+    use Dispatchable;
 
     public function __construct(
         public Bimbingan $bimbingan,
@@ -26,9 +23,13 @@ class SendBimbinganStatusEmail implements ShouldQueue
         $mahasiswa = $this->bimbingan->mahasiswa;
 
         if ($mahasiswa && $mahasiswa->email) {
-            Mail::to($mahasiswa->email)->send(
-                new BimbinganStatusMail($this->bimbingan, $this->status, $this->komentar)
-            );
+            try {
+                Mail::to($mahasiswa->email)->send(
+                    new BimbinganStatusMail($this->bimbingan, $this->status, $this->komentar)
+                );
+            } catch (\Exception $e) {
+                Log::error('Bimbingan Status Email failed: ' . $e->getMessage());
+            }
         }
     }
 }

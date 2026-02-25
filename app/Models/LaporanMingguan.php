@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Jobs\SendLaporanMingguanBaruEmail;
 use App\Jobs\SendLaporanMingguanStatusEmail;
-use App\Jobs\SendLaporanMingguanTelegram;
 use App\Jobs\SendLaporanMingguanStatusTelegram;
 
 class LaporanMingguan extends Model
@@ -20,6 +19,7 @@ class LaporanMingguan extends Model
         'week',
         'isi',
         'status',
+        'komentar',
     ];
 
     protected $casts = [
@@ -46,7 +46,7 @@ class LaporanMingguan extends Model
 
         static::created(function ($laporanMingguan) {
             SendLaporanMingguanBaruEmail::dispatch($laporanMingguan);
-            SendLaporanMingguanTelegram::dispatch($laporanMingguan);
+            SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, 'review');
         });
 
         static::updating(function($laporanMingguan){
@@ -56,10 +56,10 @@ class LaporanMingguan extends Model
                $originalStatus = strtolower(trim($laporanMingguan->getOriginal('status') ?? ''));
 
                if($originalStatus == 'revisi'){
-                    $contentFiels = ['tanggal'];
+                    $contentFields = ['isi', 'week'];
                     $hasContentChanges = false;
 
-                    foreach($contentFiels as $field){
+                    foreach($contentFields as $field){
                         if($laporanMingguan->isDirty($field)){
                             $hasContentChanges = true;
                             break;
@@ -67,8 +67,6 @@ class LaporanMingguan extends Model
                     }
 
                     if($hasContentChanges){
-                        $laporanMingguan->revision_count = ($laporanMingguan->revision_count ?? 0) + 1;
-
                         $laporanMingguan->status = 'review';
                     }
                }
@@ -76,12 +74,12 @@ class LaporanMingguan extends Model
         });
 
         static::updated(function ($laporanMingguan) {
-            if ($laporanMingguan->isDirty('status')) {
+            if ($laporanMingguan->wasChanged('status')) {
                 $newStatus = strtolower(trim($laporanMingguan->status));
 
-                if (in_array($newStatus, ['disetujui', 'revisi'])) {
-                    SendLaporanMingguanStatusEmail::dispatch($laporanMingguan, $newStatus);
-                    SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, $newStatus);
+                if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
+                    SendLaporanMingguanStatusEmail::dispatch($laporanMingguan, $newStatus, $laporanMingguan->komentar);
+                    SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, $newStatus, $laporanMingguan->komentar);
                 }
             }
         });

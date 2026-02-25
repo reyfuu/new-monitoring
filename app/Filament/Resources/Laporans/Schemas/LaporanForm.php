@@ -35,7 +35,10 @@ class LaporanForm
                     ->required()
                     ->maxLength(150)
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->label('Judul Laporan'),
+                    ->label('Judul Laporan')
+                    ->validationMessages([
+                        'required' => 'Judul laporan wajib diisi.',
+                    ]),
 
                 DatePicker::make('tanggal_mulai')
                     ->required()
@@ -43,7 +46,10 @@ class LaporanForm
                     ->default(now())
                     ->dehydrated(true)
                     ->visible(fn($operation) => $operation === 'edit' && !auth()->user()?->hasRole('dosen') && !auth()->user()?->hasRole('mahasiswa'))
-                    ->label('Tanggal Mulai'),
+                    ->label('Tanggal Mulai')
+                    ->validationMessages([
+                        'required' => 'Tanggal mulai wajib diisi.',
+                    ]),
 
                 DatePicker::make('tanggal_berakhir')
                     ->disabled(fn() => auth()->user()?->hasRole('dosen') && fn() => auth()->user()?->hasRole('mahasiswa'))
@@ -54,7 +60,10 @@ class LaporanForm
                     ->label('Deskripsi')
                     ->rows(3)
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->required(),
+                    ->required()
+                    ->validationMessages([
+                        'required' => 'Deskripsi laporan wajib diisi.',
+                    ]),
 
                 Select::make('type')
                     ->label('Tipe Laporan')
@@ -86,6 +95,9 @@ class LaporanForm
                     ->disabled(fn($operation, $record) => $operation === 'edit' || auth()->user()?->hasRole('dosen'))
                     ->dehydrated(true)
                     ->required()
+                    ->validationMessages([
+                        'required' => 'Tipe laporan wajib dipilih.',
+                    ])
                     ->helperText(function ($operation) use ($user) {
                         if ($operation === 'edit') {
                             return 'ℹ️ Tipe laporan tidak dapat diubah';
@@ -103,6 +115,10 @@ class LaporanForm
                 ->placeholder('Tempel link Google Docs / Drive di sini...')
                 ->url()
                 ->required()
+                ->validationMessages([
+                    'required' => 'Link dokumen wajib diisi.',
+                    'url' => 'Format link tidak valid.',
+                ])
                 ->suffixIcon('heroicon-o-link')
                 ->helperText('Masukkan link dokumen laporan mingguan (contoh: https://docs.google.com/...).'),
         
@@ -113,6 +129,10 @@ class LaporanForm
                     ->rows(4)
                     ->placeholder('Tambahkan komentar untuk laporan ini...')
                     ->disabled(fn() => auth()->user()?->hasRole('mahasiswa'))
+                    ->required(fn ($get) => $get('status') === 'revisi')
+                    ->validationMessages([
+                        'required' => 'Komentar wajib diisi jika status adalah Revisi.',
+                    ])
                     ->visible(true)
                     ->nullable(),
                 ];
@@ -125,11 +145,11 @@ class LaporanForm
                         $componenents[] = Select::make('status')
                             ->label('Status')
                             ->options([
-                                'pending' => 'Pending',
+                                'review' => 'Review',
                                 'disetujui' => 'Disetujui',
                                 'revisi' => 'Revisi',
                             ])
-                            ->default('pending');
+                            ->default('review');
                             
         }
 

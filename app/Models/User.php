@@ -27,6 +27,7 @@ class User extends Authenticatable
         'dosen_pembimbing_id',
         'npm',
         'nidn',
+        'telegram_chat_id',
     ];
 
     protected $hidden = [

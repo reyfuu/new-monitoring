@@ -4,35 +4,49 @@ namespace App\Jobs;
 
 use App\Models\LaporanMingguan;
 use App\Services\TelegramService;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
-class SendLaporanMingguanStatusTelegram implements ShouldQueue
+class SendLaporanMingguanStatusTelegram
 {
-    use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
+    use Dispatchable;
 
     public function __construct(
         public LaporanMingguan $laporanMingguan,
         public string $status,
+        public ?string $komentar = null,
     ) {}
 
     public function handle(TelegramService $telegram): void
     {
-        $mahasiswa = $this->laporanMingguan->mahasiswa;
-        $dosen     = $this->laporanMingguan->dosen;
+        $targetUser = null;
+        $title = "Status Laporan Mingguan Diperbarui";
+        $emoji = "📅";
 
-        $emoji = $this->status === 'disetujui' ? '✅' : '🔄';
+        if (in_array($this->status, ['disetujui', 'revisi'])) {
+            $targetUser = $this->laporanMingguan->mahasiswa;
+            $emoji = $this->status === 'disetujui' ? '✅' : '🔄';
+        } elseif ($this->status === 'review') {
+            $targetUser = $this->laporanMingguan->dosen;
+            $title = "Update Revisi Laporan Mingguan";
+            $emoji = "📥";
+        }
+
+        if (!$targetUser || !$targetUser->telegram_chat_id) {
+            return;
+        }
+
         $label = ucfirst($this->status);
 
-        $message = "{$emoji} <b>Status Laporan Mingguan Diperbarui</b>\n\n"
-            . "👤 <b>Mahasiswa:</b> " . ($mahasiswa?->name ?? '-') . "\n"
-            . "👨‍🏫 <b>Dosen:</b> " . ($dosen?->name ?? '-') . "\n"
-            . "📆 <b>Minggu ke:</b> " . ($this->laporanMingguan->week ?? '-') . "\n"
+        $message = "{$emoji} <b>{$title}</b>\n\n"
+            . "👤 <b>Mahasiswa:</b> " . ($this->laporanMingguan->mahasiswa?->name ?? '-') . "\n"
+            . "👨‍🏫 <b>Dosen:</b> " . ($this->laporanMingguan->dosen?->name ?? '-') . "\n"
+            . "📅 <b>Minggu:</b> " . $this->laporanMingguan->week . "\n"
             . "📊 <b>Status:</b> {$label}";
 
-        $telegram->send($message);
+        if ($this->komentar) {
+            $message .= "\n💬 <b>Komentar:</b> {$this->komentar}";
+        }
+
+        $telegram->send($message, $targetUser->telegram_chat_id);
     }
 }

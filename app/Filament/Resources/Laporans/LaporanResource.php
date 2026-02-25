@@ -35,31 +35,6 @@ class LaporanResource extends Resource
         return LaporanForm::configure($schema);
     }
 
-    public function afterSave(): void
-    {
-        // Logic setelah menyimpan record Laporan
-        $laporan = $this->record;
-        $oldStatus = $laporan->getOriginal('status');
-        $newStatus = $laporan->status;
-
-        if ($oldStatus === $newStatus) {
-            return;
-        }
-
-        if (in_array($newStatus, ['direview', 'revisi'])) {
-            $student= $laporan->mahasiswa;
-            
-            if($student){
-                $message = match ($newStatus){
-                    'direview' => 'Laporan Anda telah direview oleh dosen pembimbing.',
-                    'revisi' => 'Laporan Anda memerlukan revisi sesuai dengan masukan dosen pembimbing.',
-                    default => 'Status laporan Anda telah diperbarui.',
-                };
-
-            }
-        }
-    }
-
     public static function table(Table $table): Table
     {
         return LaporansTable::configure($table);
