@@ -55,20 +55,9 @@ class LaporanMingguan extends Model
             if($user && $user->hasRole('mahasiswa')){
                $originalStatus = strtolower(trim($laporanMingguan->getOriginal('status') ?? ''));
 
+               // Jika status awal adalah revisi, ubah ke review
                if($originalStatus == 'revisi'){
-                    $contentFields = ['isi', 'week'];
-                    $hasContentChanges = false;
-
-                    foreach($contentFields as $field){
-                        if($laporanMingguan->isDirty($field)){
-                            $hasContentChanges = true;
-                            break;
-                        }
-                    }
-
-                    if($hasContentChanges){
-                        $laporanMingguan->status = 'review';
-                    }
+                    $laporanMingguan->status = 'review';
                }
             }
         });

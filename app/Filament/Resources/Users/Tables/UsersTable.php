@@ -67,6 +67,13 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                TextColumn::make('telegram_chat_id')
+                    ->label('Telegram ID')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable()
+                    ->placeholder('Belum terdaftar'),
+
                 TextColumn::make('dosenPembimbing.name')
                     ->label('Dosen Pembimbing')
                     ->searchable()

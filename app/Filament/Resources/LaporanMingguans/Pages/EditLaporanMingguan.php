@@ -19,6 +19,21 @@ class EditLaporanMingguan extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $user = auth()->user();
+
+        if ($user && $user->hasRole('mahasiswa')) {
+            $originalStatus = strtolower(trim($this->record->status ?? ''));
+
+            if ($originalStatus === 'revisi') {
+                $data['status'] = 'review';
+            }
+        }
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -25,8 +25,13 @@ class UserForm
                 ->live()
                 ->required()
                 ->placeholder('Pilih role user')
+                ->afterStateHydrated(function (?array $state, callable $set) {
+                    $roleNames = $state
+                        ? Role::whereIn('id', $state)->pluck('name')->toArray()
+                        : [];
+                    $set('selected_role_names', $roleNames);
+                })
                 ->afterStateUpdated(function (?array $state, callable $set) {
-
                     $roleNames = $state
                         ? Role::whereIn('id', $state)->pluck('name')->toArray()
                         : [];
@@ -38,26 +43,26 @@ class UserForm
 
             TextInput::make('npm')
                 ->label('NPM')
-                ->required(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
-                ->visible(fn ($get) => in_array('mahasiswa', $get('selected_role_names') ?? []))
+                ->required(fn ($get) => in_array('mahasiswa', (array) ($get('selected_role_names') ?? [])))
+                ->visible(fn ($get) => in_array('mahasiswa', (array) ($get('selected_role_names') ?? [])))
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NPM mahasiswa')
                 ->validationMessages([
                     'required' => 'NPM wajib diisi untuk mahasiswa.',
+                    'unique' => 'NPM ini sudah terdaftar.',
                 ]),
-
-
 
             TextInput::make('nidn')
                 ->label('NIDN')
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
                 ->placeholder('Masukkan NIDN dosen')
-                ->required(fn ($get) => in_array('dosen', $get('selected_role_names') ?? []))
-                ->visible(fn ($get) => in_array('dosen', $get('selected_role_names') ?? []))
+                ->required(fn ($get) => in_array('dosen', (array) ($get('selected_role_names') ?? [])))
+                ->visible(fn ($get) => in_array('dosen', (array) ($get('selected_role_names') ?? [])))
                 ->validationMessages([
                     'required' => 'NIDN wajib diisi untuk dosen.',
+                    'unique' => 'NIDN ini sudah terdaftar.',
                 ]),
 
            
@@ -166,7 +171,11 @@ class UserForm
                 ->label('Telegram Chat ID')
                 ->placeholder('Masukkan ID Telegram (Personal)')
                 ->helperText('Gunakan bot @userinfobot untuk mendapatkan ID Telegram kamu.')
-                ->maxLength(50),
+                ->numeric()
+                ->maxLength(50)
+                ->validationMessages([
+                    'numeric' => 'Telegram ID harus berupa angka.',
+                ]),
     
             ]);
 
