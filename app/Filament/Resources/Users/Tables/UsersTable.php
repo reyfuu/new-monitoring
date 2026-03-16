@@ -51,8 +51,7 @@ class UsersTable
                         'success' => 'dosen',
                         'warning' => 'mahasiswa',
                     ])
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
 
                 BadgeColumn::make('status')
                     ->colors([

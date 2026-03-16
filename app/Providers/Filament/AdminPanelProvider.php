@@ -9,6 +9,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use App\Filament\Pages\Auth\CustomRegister;
+use App\Filament\Pages\Auth\CustomResetPassword;
 use App\Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -31,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('')
             ->login()
             ->registration(CustomRegister::class)
-            ->passwordReset()
+            ->passwordReset(resetAction: CustomResetPassword::class)
             ->homeUrl(fn() => auth()->check() && auth()->user()->hasRole('ka_prodi') ? '/kaprodi-dashboard' : '/dashboard')
             ->favicon(asset('images/logo.png'))
             ->sidebarWidth('15rem')
