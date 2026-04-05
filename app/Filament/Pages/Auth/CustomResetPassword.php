@@ -13,7 +13,17 @@ class CustomResetPassword extends BaseResetPassword
 {
     public function mount(?string $email = null, ?string $token = null): void
     {
-        parent::mount($email, $token);
+        if (Filament::auth()->check()) {
+            Filament::auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
+
+        $this->token = $token ?? request()->query('token');
+
+        $this->form->fill([
+            'email' => $email ?? request()->query('email'),
+        ]);
 
         $requestEmail = $email ?? request()->query('email');
         $requestToken = $token ?? request()->query('token');
