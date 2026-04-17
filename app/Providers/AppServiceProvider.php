@@ -24,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.env') !== 'local') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
         // Laporan::observe(StatusChangeObserver::class);
         // Bimbingan::observe(StatusChangeObserver::class);
         // LaporanMingguan::observe(StatusChangeObserver::class);
