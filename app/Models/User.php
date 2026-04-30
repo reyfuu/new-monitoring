@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,9 +15,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method bool hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission, string|null $guardName = null)
  */
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
-    use Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
@@ -40,19 +42,33 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // Relationship: User belongs to Dosen Pembimbing
+    /**
+     * AKSES FILAMENT
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
+    /**
+     * Relationship: User belongs to Dosen Pembimbing
+     */
     public function dosenPembimbing()
     {
         return $this->belongsTo(User::class, 'dosen_pembimbing_id');
     }
 
-    // Relationship: Dosen has many Mahasiswa
+    /**
+     * Relationship: Dosen has many Mahasiswa
+     */
     public function mahasiswaBimbingan()
     {
         return $this->hasMany(User::class, 'dosen_pembimbing_id');
     }
 
-    // Scope untuk mendapatkan hanya dosen
+    /**
+     * Scope untuk mendapatkan hanya dosen
+     */
     public function scopeDosen($query)
     {
         return $query->whereHas('roles', function ($q) {
@@ -60,7 +76,9 @@ class User extends Authenticatable
         });
     }
 
-    // Scope untuk mendapatkan hanya mahasiswa  
+    /**
+     * Scope untuk mendapatkan hanya mahasiswa
+     */
     public function scopeMahasiswa($query)
     {
         return $query->whereHas('roles', function ($q) {
@@ -73,16 +91,20 @@ class User extends Authenticatable
         return $this->hasMany(Bimbingan::class, 'user_id');
     }
 
-    // ✅ NEW: Hitung bimbingan yang sudah diverifikasi dosen (status_domen ada isinya)
+    /**
+     * Hitung bimbingan yang sudah diverifikasi dosen
+     */
     public function getBimbinganTerverifikasiAttribute()
     {
         return $this->bimbingans()
-            ->whereNotNull('status_domen') // Sudah ada status dari dosen
-            ->where('status_domen', '!=', 'review') // Exclude yang masih 'review'
+            ->whereNotNull('status_domen')
+            ->where('status_domen', '!=', 'review')
             ->count();
     }
 
-    // ✅ NEW: Hitung bimbingan yang masih menunggu (status_domen null atau masih review)
+    /**
+     * Hitung bimbingan yang masih menunggu
+     */
     public function getBimbinganMenungguAttribute()
     {
         return $this->bimbingans()
@@ -93,7 +115,9 @@ class User extends Authenticatable
             ->count();
     }
 
-    // ✅ NEW: List status_domen yang dianggap "selesai/terverifikasi"
+    /**
+     * Status yang dianggap terverifikasi
+     */
     public function getStatusDomenTerverifikasiAttribute()
     {
         return ['disetujui'];
@@ -108,5 +132,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Laporan::class, 'dosen_id');
     }
-    
 }

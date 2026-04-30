@@ -26,18 +26,17 @@ Route::get("/get-updates", function () {
   return $updates;
 });
 
-Route::get('/view-pdf/{filename)',function ($filename){
-    $path = "private/". $filename;
+Route::get('/view-pdf/{filename}', function ($filename) {
+    $path = "private/" . $filename;
 
-    if(!Storage::disk('local')->exists($path)){
+    if (!Storage::disk('local')->exists($path)) {
         abort(404);
     }
 
-return Storage::disk('local')->response($path);
-
+    return Storage::disk('local')->response($path);
 })->name('pdf.view')->middleware('auth');
 
-Route::get('/bimbingans/{bimbingan}', [BimbinganController::class, 'show'])->name('bimbingans.show');
+// Route::get('/bimbingans/{bimbingan}', [BimbinganController::class, 'show'])->name('bimbingans.show');
 
 
 
