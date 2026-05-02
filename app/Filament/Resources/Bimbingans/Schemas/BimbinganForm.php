@@ -144,9 +144,9 @@ class BimbinganForm
                             ->maxLength(100)
                             ->rows(2)
                             ->placeholder('Berikan komentar dan saran untuk mahasiswa')
-                            ->required(fn ($get) => $get('status') === 'revisi')
+                            ->required()
                             ->validationMessages([
-                                'required' => 'Komentar wajib diisi jika status adalah Revisi.',
+                                'required' => 'Komentar wajib diisi oleh dosen.',
                             ])
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
                             ->columnSpanFull(),

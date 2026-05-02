@@ -92,9 +92,9 @@ class Bimbingan extends Model
             }
         });
 
-        // Kirim email + Telegram ke mahasiswa ketika status diubah
+        // Kirim email + Telegram ke mahasiswa ketika status atau komentar diubah
         static::updated(function ($bimbingan) {
-            if ($bimbingan->wasChanged('status')) {
+            if ($bimbingan->wasChanged('status') || $bimbingan->wasChanged('komentar')) {
                 $newStatus = strtolower(trim($bimbingan->status));
 
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
