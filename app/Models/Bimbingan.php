@@ -61,14 +61,9 @@ class Bimbingan extends Model
             }
         });
 
-<<<<<<< HEAD
         // Kirim email + Telegram ke mahasiswa ketika status atau komentar diubah
         static::updated(function ($bimbingan) {
-            if ($bimbingan->wasChanged('status') || $bimbingan->wasChanged('komentar')) {
-=======
-        static::updated(function ($bimbingan) {
             if ($bimbingan->wasChanged(['status', 'komentar'])) {
->>>>>>> 3cf8ee48979906ad463ea35b36b7f58642f2ae40
                 $newStatus = strtolower(trim($bimbingan->status));
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
                     SendBimbinganStatusTelegram::dispatch($bimbingan, $newStatus, $bimbingan->komentar);
