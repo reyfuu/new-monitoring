@@ -103,7 +103,15 @@ class LaporanMingguanForm
                     'required' => 'Status wajib dipilih.',
                 ]);
 
-            
+            $components[] = Textarea::make('komentar')
+                ->label('Komentar')
+                ->rows(3)
+                ->placeholder('Tambahkan komentar untuk laporan mingguan ini...')
+                ->required()
+                ->validationMessages([
+                    'required' => 'Komentar wajib diisi untuk memberikan feedback.',
+                ])
+                ->helperText('⚠️ Komentar wajib diisi untuk memberikan feedback dan mengirim notifikasi Telegram.');
         }
 
         return $schema->components($components);

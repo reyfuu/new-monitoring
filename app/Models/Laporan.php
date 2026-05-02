@@ -21,7 +21,6 @@ class Laporan extends Model
         'dosen_id',
         'dokumen',
         'status',
-        'status_dosen',
         'type',
         'komentar',
     ];
@@ -49,7 +48,7 @@ class Laporan extends Model
 
         static::created(function ($laporan) {
             SendLaporanBaruEmail::dispatch($laporan);
-            SendLaporanStatusTelegram::dispatch($laporan, 'review');
+            SendLaporanStatusTelegram::dispatch($laporan, 'review', null, true);
         });
 
         static::updating(function ($laporan) {
@@ -78,11 +77,11 @@ class Laporan extends Model
         });
 
         static::updated(function ($laporan) {
-            \Illuminate\Support\Facades\Log::info("Laporan UPDATED Triggered: ID {$laporan->id}, Status: {$laporan->status}, WasChanged(status): " . ($laporan->wasChanged('status') ? 'YES' : 'NO'));
+            \Illuminate\Support\Facades\Log::info("Laporan UPDATED Triggered: ID {$laporan->id}, Status: {$laporan->status}");
             
-            if ($laporan->wasChanged('status')) {
+            if ($laporan->wasChanged(['status', 'komentar'])) {
                 $newStatus = strtolower(trim($laporan->status ?? ''));
-                \Illuminate\Support\Facades\Log::info("Laporan Status Hook Match: New Status: {$newStatus}");
+                \Illuminate\Support\Facades\Log::info("Laporan Notification Triggered: New Status: {$newStatus}");
 
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
                     SendLaporanStatusEmail::dispatch($laporan, $newStatus, $laporan->komentar);

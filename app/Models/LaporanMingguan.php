@@ -46,7 +46,7 @@ class LaporanMingguan extends Model
 
         static::created(function ($laporanMingguan) {
             SendLaporanMingguanBaruEmail::dispatch($laporanMingguan);
-            SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, 'review');
+            SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, 'review', null, true);
         });
 
         static::updating(function($laporanMingguan){
@@ -63,7 +63,7 @@ class LaporanMingguan extends Model
         });
 
         static::updated(function ($laporanMingguan) {
-            if ($laporanMingguan->wasChanged('status')) {
+            if ($laporanMingguan->wasChanged(['status', 'komentar'])) {
                 $newStatus = strtolower(trim($laporanMingguan->status));
 
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {

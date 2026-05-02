@@ -119,6 +119,7 @@ class BimbinganForm
                                 'required' => 'Isi bimbingan wajib diisi.',
                             ])
                             ->disabled(fn() => auth()->user()?->hasRole('dosen'))
+                            ->helperText('⚠️ Jelaskan rincian progres atau materi bimbingan yang telah dilakukan.')
                             ->columnSpanFull(),
 
                         // -------------------- STATUS BIMBINGAN --------------------
@@ -146,8 +147,9 @@ class BimbinganForm
                             ->placeholder('Berikan komentar dan saran untuk mahasiswa')
                             ->required()
                             ->validationMessages([
-                                'required' => 'Komentar wajib diisi oleh dosen.',
+                                'required' => 'Komentar wajib diisi untuk memberikan feedback.',
                             ])
+                            ->helperText('⚠️ Komentar wajib diisi untuk memberikan feedback dan mengirim notifikasi Telegram.')
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
                             ->columnSpanFull(),
 

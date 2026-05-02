@@ -129,12 +129,12 @@ class LaporanForm
                     ->rows(4)
                     ->placeholder('Tambahkan komentar untuk laporan ini...')
                     ->disabled(fn() => auth()->user()?->hasRole('mahasiswa'))
-                    ->required(fn ($get) => $get('status') === 'revisi')
+                    ->required(fn() => !auth()->user()?->hasRole('mahasiswa'))
                     ->validationMessages([
-                        'required' => 'Komentar wajib diisi jika status adalah Revisi.',
+                        'required' => 'Komentar wajib diisi untuk memberikan feedback.',
                     ])
-                    ->visible(true)
-                    ->nullable(),
+                    ->helperText('⚠️ Komentar wajib diisi untuk memberikan feedback dan mengirim notifikasi Telegram.')
+                    ->visible(true),
                 ];
 
                 // Hidden::make('status')
