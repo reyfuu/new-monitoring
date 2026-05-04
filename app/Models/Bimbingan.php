@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendBimbinganStatusTelegram;
+use App\Jobs\SendBimbinganBaruEmail;
+use App\Jobs\SendBimbinganStatusEmail;
 
 class Bimbingan extends Model
 {
@@ -48,6 +50,7 @@ class Bimbingan extends Model
         });
 
         static::created(function ($bimbingan) {
+            SendBimbinganBaruEmail::dispatch($bimbingan);
             SendBimbinganStatusTelegram::dispatch($bimbingan, 'review', null, true);
         });
 
@@ -66,6 +69,7 @@ class Bimbingan extends Model
             if ($bimbingan->wasChanged(['status', 'komentar'])) {
                 $newStatus = strtolower(trim($bimbingan->status));
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
+                    SendBimbinganStatusEmail::dispatch($bimbingan, $newStatus, $bimbingan->komentar);
                     SendBimbinganStatusTelegram::dispatch($bimbingan, $newStatus, $bimbingan->komentar);
                 }
             }
