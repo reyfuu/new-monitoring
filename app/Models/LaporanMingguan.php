@@ -19,7 +19,6 @@ class LaporanMingguan extends Model
         'week',
         'isi',
         'status',
-        'komentar',
     ];
 
     protected $casts = [
@@ -63,12 +62,12 @@ class LaporanMingguan extends Model
         });
 
         static::updated(function ($laporanMingguan) {
-            if ($laporanMingguan->wasChanged(['status', 'komentar'])) {
+            if ($laporanMingguan->wasChanged(['status'])) {
                 $newStatus = strtolower(trim($laporanMingguan->status));
 
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
-                    SendLaporanMingguanStatusEmail::dispatch($laporanMingguan, $newStatus, $laporanMingguan->komentar);
-                    SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, $newStatus, $laporanMingguan->komentar);
+                    SendLaporanMingguanStatusEmail::dispatch($laporanMingguan, $newStatus, null);
+                    SendLaporanMingguanStatusTelegram::dispatch($laporanMingguan, $newStatus, null);
                 }
             }
         });
@@ -114,5 +113,5 @@ class LaporanMingguan extends Model
         return $query->where('status', $status);
     }
 
- 
+
 }

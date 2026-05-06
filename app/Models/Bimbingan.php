@@ -66,11 +66,11 @@ class Bimbingan extends Model
 
         // Kirim email + Telegram ke mahasiswa ketika status atau komentar diubah
         static::updated(function ($bimbingan) {
-            if ($bimbingan->wasChanged(['status', 'komentar'])) {
+            if ($bimbingan->wasChanged(['status'])) {
                 $newStatus = strtolower(trim($bimbingan->status));
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
-                    SendBimbinganStatusEmail::dispatch($bimbingan, $newStatus, $bimbingan->komentar);
-                    SendBimbinganStatusTelegram::dispatch($bimbingan, $newStatus, $bimbingan->komentar);
+                    SendBimbinganStatusEmail::dispatch($bimbingan, $newStatus, null);
+                    SendBimbinganStatusTelegram::dispatch($bimbingan, $newStatus, null);
                 }
             }
         });
@@ -84,5 +84,14 @@ class Bimbingan extends Model
     public function dosen(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dosen_id');
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'bimbingan_id');
+    }
+
+    public function latestComment()
+    {
+        return $this->hasOne(Comment::class, 'bimbingan_id')->latestOfMany();
     }
 }

@@ -79,13 +79,13 @@ class Laporan extends Model
         static::updated(function ($laporan) {
             \Illuminate\Support\Facades\Log::info("Laporan UPDATED Triggered: ID {$laporan->id}, Status: {$laporan->status}");
             
-            if ($laporan->wasChanged(['status', 'komentar'])) {
+            if ($laporan->wasChanged(['status'])) {
                 $newStatus = strtolower(trim($laporan->status ?? ''));
                 \Illuminate\Support\Facades\Log::info("Laporan Notification Triggered: New Status: {$newStatus}");
 
                 if (in_array($newStatus, ['disetujui', 'revisi', 'review'])) {
-                    SendLaporanStatusEmail::dispatch($laporan, $newStatus, $laporan->komentar);
-                    SendLaporanStatusTelegram::dispatch($laporan, $newStatus, $laporan->komentar);
+                    SendLaporanStatusEmail::dispatch($laporan, $newStatus, null);
+                    SendLaporanStatusTelegram::dispatch($laporan, $newStatus, null);
                 }
             }
         });
@@ -119,5 +119,14 @@ class Laporan extends Model
     public function scopeWithStatus($query, $status)
     {
         return $query->where('status', $status);
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'laporan_id');
+    }
+
+    public function latestComment()
+    {
+        return $this->hasOne(Comment::class, 'laporan_id')->latestOfMany();
     }
 }

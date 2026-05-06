@@ -139,28 +139,16 @@ class BimbinganForm
                             ->default('review')
                             ->visible($user->hasRole('mahasiswa')),
 
-                        // -------------------- KOMENTAR --------------------
                         Textarea::make('komentar')
-                            ->label('Komentar untuk Mahasiswa')
-                            ->maxLength(100)
-                            ->rows(2)
-                            ->placeholder('Berikan komentar dan saran untuk mahasiswa')
-                            ->required()
-                            ->validationMessages([
-                                'required' => 'Komentar wajib diisi untuk memberikan feedback.',
-                            ])
-                            ->helperText('⚠️ Komentar wajib diisi untuk memberikan feedback dan mengirim notifikasi Telegram.')
-                            ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
+                            ->label('Beri Feedback / Komentar Baru')
+                            ->maxLength(255)
+                            ->rows(3)
+                            ->placeholder('Tulis feedback jika ada revisi atau catatan...')
+                            ->dehydrated(true)
+                            ->visible($user->hasAnyRole(['super_admin', 'dosen']))
                             ->columnSpanFull(),
 
-                        Textarea::make('komentar')
-                            ->label('Komentar Dosen')
-                            ->maxLength(100)
-                            ->rows(2)
-                            ->placeholder('Belum ada komentar dari dosen')
-                            ->disabled()
-                            ->visible(fn($get) => $user->hasRole('mahasiswa') && !empty($get('komentar')))
-                            ->columnSpanFull(),
+
                     ]),
             ]);
     }

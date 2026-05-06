@@ -8,6 +8,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -124,17 +125,20 @@ class LaporanForm
         
 
 
+                Placeholder::make('latest_feedback')
+                    ->label('Feedback Terakhir')
+                    ->content(fn($record) => $record?->comments()->latest()->first()?->komentar ?? 'Belum ada feedback')
+                    ->visible($user->hasAnyRole(['super_admin', 'dosen']))
+                    ->columnSpanFull(),
+
                 Textarea::make('komentar')
-                    ->label('Komentar')
+                    ->label('Komentar / Feedback Baru')
                     ->rows(4)
                     ->placeholder('Tambahkan komentar untuk laporan ini...')
+                    ->dehydrated(true)
                     ->disabled(fn() => auth()->user()?->hasRole('mahasiswa'))
-                    ->required(fn() => !auth()->user()?->hasRole('mahasiswa'))
-                    ->validationMessages([
-                        'required' => 'Komentar wajib diisi untuk memberikan feedback.',
-                    ])
-                    ->helperText('⚠️ Komentar wajib diisi untuk memberikan feedback dan mengirim notifikasi Telegram.')
-                    ->visible(true),
+                    ->helperText('⚠️ Komentar ini akan disimpan ke tabel utama dan riwayat.')
+                    ->visible($user->hasAnyRole(['super_admin', 'dosen'])),
                 ];
 
                 // Hidden::make('status')

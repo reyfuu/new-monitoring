@@ -7,6 +7,7 @@ use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
@@ -102,16 +103,6 @@ class LaporanMingguanForm
                 ->validationMessages([
                     'required' => 'Status wajib dipilih.',
                 ]);
-
-            $components[] = Textarea::make('komentar')
-                ->label('Komentar')
-                ->rows(3)
-                ->placeholder('Tambahkan komentar untuk laporan mingguan ini...')
-                ->required()
-                ->validationMessages([
-                    'required' => 'Komentar wajib diisi untuk memberikan feedback.',
-                ])
-                ->helperText('⚠️ Komentar wajib diisi untuk memberikan feedback dan mengirim notifikasi Telegram.');
         }
 
         return $schema->components($components);

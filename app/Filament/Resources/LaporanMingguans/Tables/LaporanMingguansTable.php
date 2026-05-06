@@ -14,8 +14,14 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LaporanMingguan;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\DatePicker;
 use Filament\Actions\EditAction;
 use Illuminate\Database\Eloquent\Builder;
+use App\Jobs\SendLaporanMingguanStatusEmail;
+use App\Jobs\SendLaporanMingguanStatusTelegram;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 
 
 class LaporanMingguansTable
@@ -104,7 +110,13 @@ class LaporanMingguansTable
                             ->required(),
                     ])
                     ->action(function ($record, array $data) {
-                        $record->update($data);
+                        $record->update([
+                            'status' => $data['status'],
+                        ]);
+
+                        // Kirim notifikasi tanpa komentar
+                        SendLaporanMingguanStatusEmail::dispatch($record, $data['status'], null);
+                        SendLaporanMingguanStatusTelegram::dispatch($record, $data['status'], null);
                     })
                     ->visible(fn($record) => $user->hasRole('dosen'))
                     ->modalHeading('Update Status Laporan')
@@ -112,6 +124,7 @@ class LaporanMingguansTable
             ])
             ->actions([
                 EditAction::make(),
+
             ])
             ->bulkActions([
                 BulkActionGroup::make([
