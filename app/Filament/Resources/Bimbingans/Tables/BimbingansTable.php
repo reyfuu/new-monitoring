@@ -2,26 +2,30 @@
 
 namespace App\Filament\Resources\Bimbingans\Tables;
 
-
+// FIX: Import namespace yang benar
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Action;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Textarea;
+use Illuminate\Support\Facades\Auth;
+use App\Models\LaporanMingguan;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\DatePicker;
+use Filament\Actions\EditAction;
+use Illuminate\Database\Eloquent\Builder;
+use App\Jobs\SendLaporanMingguanStatusEmail;
+use App\Jobs\SendLaporanMingguanStatusTelegram;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use App\Jobs\SendBimbinganStatusEmail;
-use App\Jobs\SendBimbinganStatusTelegram;
-use Illuminate\Support\Facades\Auth;
-use Filament\Actions\ForceDeleteBulkAction;
+
 
 class BimbingansTable
 {
@@ -31,61 +35,63 @@ class BimbingansTable
         $user = Auth::user();
 
         return $table
-            ->recordUrl(null) // Prevent row clicking
-            // ==================== GROUPING ====================
+            ->recordUrl(null)
+            ->persistColumnSearchesInSession(false)
+            ->persistSearchInSession(false)
+            ->persistSortInSession(false)
+            ->persistFiltersInSession(false)
             ->groups([
                 Group::make('mahasiswa.name')
                     ->label('Mahasiswa')
                     ->collapsible()
                     ->titlePrefixedWithLabel(false)
                     ->getTitleFromRecordUsing(function ($record) {
-                        // Hitung total bimbingan untuk mahasiswa ini
-                        $totalPertemuan = \App\Models\Bimbingan::where('user_id', $record->user_id)
-                            ->count();
+                        // FIX: pakai relasi yang sudah di-eager load, tidak query ulang
+                        $totalPertemuan = $record->mahasiswa->bimbingans_count
+                            ?? \App\Models\Bimbingan::where('user_id', $record->user_id)->count();
 
                         return $record->mahasiswa->name . " ({$totalPertemuan} pertemuan)";
                     }),
             ])
             ->defaultGroup('mahasiswa.name')
             ->groupsOnly(false)
-            ->groupingSettingsInDropdownOnDesktop() // Hide group buttons from UI
+            ->striped()
+            // FIX: hapus ->columnSpanFull (bukan method Table)
+            ->groupingSettingsInDropdownOnDesktop()
             ->columns([
-                // PERTEMUAN KE - FIXED LOGIC
                 TextColumn::make('pertemuan_ke')
                     ->label('Pertemuan')
                     ->badge()
                     ->color('success')
-                    ->formatStateUsing(fn($state) => $state ? "#{$state}" : 'N/A')
+                    ->icon('heroicon-m-hashtag')
+                    ->formatStateUsing(fn($state) => $state ? "Ke-{$state}" : 'N/A')
                     ->sortable()
                     ->getStateUsing(function ($record) {
-                        // Hitung urutan pertemuan berdasarkan tanggal
+                        // faster: count how many records up to this tanggal for the same user
                         return \App\Models\Bimbingan::where('user_id', $record->user_id)
                             ->where('tanggal', '<=', $record->tanggal)
-                            ->orderBy('tanggal')
-                            ->orderBy('created_at')
-                            ->pluck('id')
-                            ->search($record->id) + 1;
+                            ->count();
                     }),
 
-                // MAHASISWA (hidden saat grouping aktif)
                 TextColumn::make('mahasiswa.name')
                     ->label('Mahasiswa')
+                    ->icon('heroicon-m-user')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible($user->hasRole('super_admin') || $user->hasRole('dosen')),
 
-                // DOSEN
                 TextColumn::make('dosen.name')
                     ->label('Dosen')
+                    ->icon('heroicon-m-user-circle')
                     ->searchable()
                     ->sortable()
                     ->placeholder('Belum ada dosen')
                     ->toggleable(),
 
-                // TOPIK PERTEMUAN
                 TextColumn::make('topik')
                     ->label('Topik Pertemuan')
+                    ->icon('heroicon-m-chat-bubble-bottom-center-text')
                     ->searchable()
                     ->limit(40)
                     ->tooltip(function (TextColumn $column): ?string {
@@ -94,40 +100,48 @@ class BimbingansTable
                     })
                     ->weight('medium'),
 
-                // TANGGAL
                 TextColumn::make('tanggal')
                     ->label('Tanggal')
-                    ->date('d/m/Y')
+                    ->icon('heroicon-m-calendar')
+                    ->date('d M Y')
                     ->sortable(),
 
-                // TYPE
                 TextColumn::make('type')
-                    ->label('Jenis'),
+                    ->label('Jenis')
+                    ->badge()
+                    ->color('gray')
+                    ->formatStateUsing(fn($state) => ucfirst($state)),
 
-                // STATUS
-                BadgeColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status')
-                    ->colors([
-                        'warning' => 'review',
-                        'success' => 'disetujui',
-                        'danger' => 'revisi',
-                    ])
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'review' => 'warning',
+                        'disetujui' => 'success',
+                        'revisi' => 'danger',
+                        default => 'gray',
+                    })
+                    ->icon(fn(string $state): string => match ($state) {
+                        'review' => 'heroicon-m-clock',
+                        'disetujui' => 'heroicon-m-check-circle',
+                        'revisi' => 'heroicon-m-exclamation-triangle',
+                        default => 'heroicon-m-question-mark-circle',
+                    })
                     ->formatStateUsing(fn($state) => match ($state) {
                         'review' => 'Review',
                         'disetujui' => 'Disetujui',
                         'revisi' => 'Revisi',
-                        default => $state,
+                        default => ucfirst($state),
                     }),
 
-                // REVISION COUNT
                 TextColumn::make('revision_count')
                     ->label('Revisi Ke-')
                     ->badge()
                     ->color('info')
-                    ->formatStateUsing(fn($state) => $state > 0 ? "#{$state}" : '-')
+                    ->icon('heroicon-m-arrow-path')
+                    ->formatStateUsing(fn($state) => $state > 0 ? "{$state}" : '-')
                     ->toggleable(),
 
-                // ISI
                 TextColumn::make('isi')
                     ->label('Isi Pertemuan')
                     ->limit(50)
@@ -137,7 +151,6 @@ class BimbingansTable
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                // CREATED AT
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d/m/Y H:i')
@@ -147,11 +160,9 @@ class BimbingansTable
             ->headerActions([
                 CreateAction::make()
                     ->label('Buat Bimbingan Baru')
-                    ->icon('heroicon-o-plus')
-                    ->visible($user->hasRole('mahasiswa'))
+                    ->visible($user->hasRole('mahasiswa')),
             ])
             ->filters([
-                // Filter Status - Admin
                 SelectFilter::make('status')
                     ->options([
                         'review' => 'Review',
@@ -160,14 +171,12 @@ class BimbingansTable
                     ])
                     ->visible($user->hasRole('super_admin')),
 
-                // Filter Mahasiswa - Dosen
                 SelectFilter::make('mahasiswa')
                     ->relationship('mahasiswa', 'name')
                     ->searchable()
                     ->preload()
                     ->visible($user->hasRole('dosen')),
 
-                // Filter Jenis Bimbingan
                 SelectFilter::make('type')
                     ->label('Jenis Bimbingan')
                     ->options([
@@ -177,60 +186,6 @@ class BimbingansTable
                     ]),
             ])
             ->recordActions([
-                Action::make('update_status')
-                    ->label('Update Status')
-                    ->icon('heroicon-o-pencil')
-                    ->color('primary')
-                    ->form([
-                        Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'review' => 'Review',
-                                'disetujui' => 'Disetujui',
-                                'revisi' => 'Revisi',
-                            ])
-                            ->required(),
-                        Textarea::make('komentar')
-                            ->label('Beri Komentar (Opsional)')
-                            ->rows(3)
-                            ->placeholder('Tulis feedback jika perlu...'),
-                    ])
-                    ->action(function ($record, array $data) {
-                        \Illuminate\Support\Facades\Log::info("BimbingansTable update_status Triggered", [
-                            'komentar' => $data['komentar'] ?? 'MISSING',
-                            'record_id' => $record->id
-                        ]);
-
-                        $record->update([
-                            'status' => $data['status'],
-                            'komentar' => $data['komentar'],
-                        ]);
-
-                        if (!empty($data['komentar'])) {
-                            $record->comments()->create([
-                                'komentar' => $data['komentar'],
-                                'tanggal' => now(),
-                                'npm' => $record->mahasiswa?->npm,
-                                'dosen' => Auth::user()->name,
-                                'nidn' => Auth::user()->nidn,
-                                'user_id' => Auth::id(),
-                                'jenis' => 'Bimbingan',
-                            ]);
-
-                            \Illuminate\Support\Facades\Log::info("Comment Created for Bimbingan ID {$record->id}");
-                            
-                            // Kirim notifikasi dengan komentar
-                            SendBimbinganStatusEmail::dispatch($record, $data['status'], $data['komentar']);
-                            SendBimbinganStatusTelegram::dispatch($record, $data['status'], $data['komentar']);
-                        } else {
-                            // Kirim notifikasi tanpa komentar (status saja)
-                            SendBimbinganStatusEmail::dispatch($record, $data['status'], null);
-                            SendBimbinganStatusTelegram::dispatch($record, $data['status'], null);
-                        }
-                    })
-                    ->visible(fn() => Auth::user()->hasRole('dosen'))
-                    ->modalHeading('Update Status Bimbingan')
-                    ->modalSubmitActionLabel('Simpan'),
             ])
             ->actions([
                 Action::make('komentar')
@@ -239,50 +194,62 @@ class BimbingansTable
                     ->color('info')
                     ->modalHeading('Riwayat Komentar')
                     ->modalSubmitAction(false)
-                    ->infolist(fn ($record) => [
+                    ->infolist(fn($record) => [
                         TextEntry::make('history_log')
                             ->label('')
                             ->html()
                             ->default(' ')
                             ->getStateUsing(function ($record) {
-                                \Illuminate\Support\Facades\Log::info("Viewing History for Bimbingan ID: {$record->id}, Class: " . get_class($record));
-                                // Get all comments for this student's bimbingans
                                 $comments = \App\Models\Comment::whereHas('bimbingan', function ($query) use ($record) {
                                     $query->where('user_id', $record->user_id);
-                                })->latest()->get();
-                                
-                                \Illuminate\Support\Facades\Log::info("Comments count: " . $comments->count());
+                                })->orderBy('tanggal', 'desc')->get();
 
                                 if ($comments->isEmpty()) {
                                     return new HtmlString('<div class="text-gray-500 italic">Belum ada komentar</div>');
                                 }
 
-                                $html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+                                $html = '<div class="comment-list">';
+
                                 foreach ($comments as $comment) {
+                                    // Determine role: prefer nidn (dosen) or npm (mahasiswa)
+                                    $isDosen = !empty($comment->nidn);
+                                    $name = $comment->dosen ?? $comment->nama ?? ($comment->user?->name ?? 'User');
                                     $tanggal = $comment->tanggal ? $comment->tanggal->format('d M Y') : '-';
-                                    $jenis = $comment->jenis ? "<span style='margin-right: 8px; padding: 2px 6px; border-radius: 4px; background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.75rem; font-weight: bold;'>{$comment->jenis}</span>" : "";
-                                    $html .= "
-                                        <div style='padding: 1rem; border: 1px solid rgba(128, 128, 128, 0.3); border-radius: 0.5rem;'>
-                                            <div style='display: flex; justify-content: space-between; margin-bottom: 0.5rem;'>
-                                                <span style='font-weight: bold;'>Dosen: {$comment->dosen}</span>
-                                                <span style='font-size: 0.875rem; opacity: 0.7; display: flex; align-items: center;'>{$jenis}{$tanggal}</span>
-                                            </div>
-                                            <div style='white-space: pre-wrap;'>{$comment->komentar}</div>
-                                        </div>";
+
+                                    $escapedComment = e($comment->komentar);
+                                    $shortLimit = 220;
+                                    $isLong = mb_strlen($comment->komentar) > $shortLimit;
+                                    $shortText = $isLong ? e(mb_substr($comment->komentar, 0, $shortLimit)) . '...' : $escapedComment;
+                                    $commentId = 'comment-' . $comment->id;
+
+                                    // No avatar/icon and no bold name outside the box; render a cleaner box
+                                    // determine dosen name to show inside the box
+                                    $dosenName = $record->dosen?->name ?? $comment->dosen ?? '-';
+
+                                    $html .= "<div class=\"cm-box\">";
+                                    $html .= "<div class=\"cm-meta\">Bimbingan · Dosen: " . e($dosenName) . "</div>";
+                                    $html .= "<div class=\"cm-text\" id=\"{$commentId}-short\">{$shortText}</div>";
+                                    if ($isLong) {
+                                        $html .= "<div id=\"{$commentId}-full\" style=\"display:none\" class=\"cm-text\">{$escapedComment}</div>";
+                                        $html .= "<button type=\"button\" class=\"cm-toggle\" onclick=\"var s=document.getElementById('{$commentId}-short');var f=document.getElementById('{$commentId}-full');s.style.display=(s.style.display==='none')?'block':'none';f.style.display=(f.style.display==='none')?'block':'none';this.innerText = this.innerText.includes('Lihat') ? 'Tutup' : 'Lihat selengkapnya';\">Lihat selengkapnya</button>";
+                                    }
+                                    $html .= "</div>";
                                 }
+
                                 $html .= '</div>';
-                                
+
                                 return new HtmlString($html);
-                            })
-                    ])
-                    ->visible(true),
+                            }),
+                    ]),
+
                 EditAction::make()
                     ->visible(
-                        fn($record) => ! in_array(
+                        fn($record) => !in_array(
                             strtolower(trim($record->status ?? '')),
                             ['completed', 'disetujui']
                         )
                     ),
+
                 DeleteAction::make()
                     ->visible(function (\App\Models\Bimbingan $record) use ($user) {
                         if ($user->hasRole('super_admin')) return true;
@@ -294,11 +261,6 @@ class BimbingansTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ])
-            ->toolbarActions([
-                ForceDeleteBulkAction::make(),
-                DeleteBulkAction::make(),
-
             ])
             ->defaultSort('tanggal', 'asc')
             ->deferLoading();
