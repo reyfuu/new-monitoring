@@ -5,7 +5,7 @@ namespace App\Filament\Resources\Laporans\Tables;
 use App\Models\Laporan;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\Action;
+use Filament\Tables\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
