@@ -40,4 +40,33 @@ class EditLaporanMingguan extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        $data = $this->form->getRawState();
+        $record = $this->record;
+
+        \Illuminate\Support\Facades\Log::info("EditLaporanMingguan afterSave Triggered", [
+            'komentar' => $data['komentar'] ?? 'MISSING',
+            'record_id' => $record->id
+        ]);
+
+        if (!empty($data['komentar'])) {
+            $record->comments()->create([
+                'komentar' => $data['komentar'],
+                'tanggal' => now(),
+                'npm' => $record->mahasiswa?->npm,
+                'dosen' => auth()->user()->name,
+                'nidn' => auth()->user()->nidn,
+                'user_id' => auth()->id(),
+                'jenis' => 'Laporan Mingguan',
+            ]);
+
+            \Illuminate\Support\Facades\Log::info("Comment Created for Laporan Mingguan ID {$record->id}");
+
+            // Kirim notifikasi dengan komentar
+            \App\Jobs\SendLaporanMingguanStatusEmail::dispatch($record, $record->status, $data['komentar']);
+            \App\Jobs\SendLaporanMingguanStatusTelegram::dispatch($record, $record->status, $data['komentar']);
+        }
+    }
 }

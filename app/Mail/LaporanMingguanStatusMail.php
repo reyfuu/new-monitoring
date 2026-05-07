@@ -16,7 +16,6 @@ class LaporanMingguanStatusMail extends Mailable
     public function __construct(
         public LaporanMingguan $laporanMingguan,
         public string $status,
-        public ?string $komentar = null,
     ) {}
 
     public function envelope(): Envelope
@@ -37,7 +36,6 @@ class LaporanMingguanStatusMail extends Mailable
                 'mahasiswa' => $this->laporanMingguan->mahasiswa,
                 'dosen' => $this->laporanMingguan->dosen,
                 'status' => $this->status,
-                'komentar' => $this->komentar,
             ],
         );
     }

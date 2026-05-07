@@ -65,26 +65,7 @@ class BimbinganResource extends Resource
                         });
                 }
                 return $query;
-            })
-            ->actions([
-                EditAction::make()
-                    ->visible(
-                        fn($record) => ! in_array(
-                            strtolower(trim($record->status ?? '')),
-                            ['completed', 'disetujui']
-                        )
-                    ),
-                DeleteAction::make()
-                    ->visible(function (Bimbingan $record) use ($user) {
-                        if ($user->hasRole('super_admin')) return true;
-                        if ($user->hasRole('mahasiswa') && $record->user_id == $user->id && $record->status == 'pending') return true;
-                        return false;
-                    }),
-            ])
-            ->bulkActions([
-                DeleteBulkAction::make()
-                    ->visible($user->hasRole('super_admin')),
-            ]);
+            });
     }
 
     public static function canCreate(): bool

@@ -114,4 +114,8 @@ class LaporanMingguan extends Model
     }
 
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'laporan_mingguan_id');
+    }
 }

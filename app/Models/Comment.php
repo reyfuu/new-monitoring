@@ -9,6 +9,7 @@ class Comment extends Model
     protected $fillable = [
         'bimbingan_id',
         'laporan_id',
+        'laporan_mingguan_id',
         'user_id',
         'npm',
         'dosen',
@@ -30,6 +31,11 @@ class Comment extends Model
     public function laporan()
     {
         return $this->belongsTo(Laporan::class);
+    }
+
+    public function laporanMingguan()
+    {
+        return $this->belongsTo(LaporanMingguan::class);
     }
 
     public function user()

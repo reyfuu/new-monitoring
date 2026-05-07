@@ -15,7 +15,6 @@ class SendLaporanMingguanStatusEmail
     public function __construct(
         public LaporanMingguan $laporanMingguan,
         public string $status,
-        public ?string $komentar = null,
     ) {}
 
     public function handle(): void
@@ -25,7 +24,7 @@ class SendLaporanMingguanStatusEmail
         if ($mahasiswa && $mahasiswa->email) {
             try {
                 Mail::to($mahasiswa->email)->send(
-                    new LaporanMingguanStatusMail($this->laporanMingguan, $this->status, $this->komentar)
+                    new LaporanMingguanStatusMail($this->laporanMingguan, $this->status)
                 );
             } catch (\Exception $e) {
                 Log::error('Laporan Mingguan Status Email failed: ' . $e->getMessage());

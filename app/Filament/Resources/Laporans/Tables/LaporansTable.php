@@ -11,7 +11,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
@@ -52,29 +51,37 @@ class LaporansTable
             ->columns([
                 TextColumn::make('judul')
                     ->label('Judul')
+                    ->icon('heroicon-m-document-text')
                     ->limit(30)
                     ->tooltip(fn($record) => $record->judul)
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 TextColumn::make('mahasiswa.name')
                     ->label('Mahasiswa')
+                    ->icon('heroicon-m-user')
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('dosen.name')
                     ->label('Dosen Pembimbing')
-                    ->searchable(),
+                    ->icon('heroicon-m-user-circle')
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('type')
                     ->label('Jenis')
+                    ->badge()
+                    ->color('gray')
                     ->sortable(),
 
                 TextColumn::make('dokumen')
                     ->label('Dokumen')
                     ->formatStateUsing(function ($state) {
                         if (filter_var($state, FILTER_VALIDATE_URL)) {
-                            return "<a href='{$state}' target='_blank' class='text-primary-600 underline'>Buka Dokumen</a>";
+                            return "<div class='flex items-center gap-2'><span class='p-1.5 rounded-lg bg-primary-100 text-primary-700'><svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'></path></svg></span> <a href='{$state}' target='_blank' class='text-primary-600 font-medium hover:underline'>Buka Dokumen</a></div>";
                         }
                         return e(\Illuminate\Support\Str::limit($state, 80));
                     })
@@ -82,13 +89,21 @@ class LaporansTable
                     ->searchable()
                     ->wrap(),
 
-                BadgeColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status')
-                    ->colors([
-                        'warning' => 'review',
-                        'success' => 'disetujui',
-                        'danger' => 'revisi',
-                    ])
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'review' => 'warning',
+                        'disetujui' => 'success',
+                        'revisi' => 'danger',
+                        default => 'secondary',
+                    })
+                    ->icon(fn (?string $state): string => match ($state) {
+                        'review' => 'heroicon-m-clock',
+                        'disetujui' => 'heroicon-m-check-circle',
+                        'revisi' => 'heroicon-m-exclamation-triangle',
+                        default => 'heroicon-m-question-mark-circle',
+                    })
                     ->formatStateUsing(fn($state) => match ($state) {
                         'review' => 'Review',
                         'disetujui' => 'Disetujui',
@@ -96,28 +111,20 @@ class LaporansTable
                         default => $state ?? 'Review',
                     }),
 
-
-
-
-            //    TextColumn::make('revision_count')
-            //         ->label('Revisi Ke-')
-            //         ->badge()
-            //         ->color('info')
-            //         ->formatStateUsing(fn($state) => $state > 0 ? "#{$state}" : '-')
-            //         ->toggleable(),
-
                 TextColumn::make('tanggal_mulai')
                     ->label('Mulai')
-                    ->date(),
-
+                    ->icon('heroicon-m-calendar')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->headerActions([
                 CreateAction::make()
                     ->label('Tambah Laporan Baru')
                     ->icon('heroicon-o-plus')
-                    ->visible(fn() => $user->hasRole('mahasiswa')),
+                    ->visible(fn() => Auth::user()->hasRole('mahasiswa')),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('update_status')
                     ->label('Update Status')
                     ->icon('heroicon-o-pencil')
@@ -172,8 +179,7 @@ class LaporansTable
                     ->visible(fn($record) => Auth::user()->hasRole('dosen'))
                     ->modalHeading('Update Status Laporan')
                     ->modalSubmitActionLabel('Simpan'),
-            ])
-            ->actions([
+
                 Action::make('komentar')
                     ->label('Komentar')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')

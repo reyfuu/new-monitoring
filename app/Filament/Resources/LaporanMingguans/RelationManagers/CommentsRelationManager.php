@@ -51,17 +51,23 @@ class CommentsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('tanggal')
                     ->label('Tanggal')
-                    ->date()
+                    ->badge()
+                    ->color('info')
+                    ->icon('heroicon-m-calendar')
+                    ->date('d M Y')
                     ->sortable(),
                 TextColumn::make('komentar')
                     ->label('Isi Komentar')
+                    ->icon('heroicon-m-chat-bubble-left-ellipsis')
                     ->wrap()
                     ->searchable(),
                 TextColumn::make('npm')
                     ->label('NPM')
+                    ->icon('heroicon-m-hashtag')
                     ->placeholder('-'),
                 TextColumn::make('dosen')
                     ->label('Dosen')
+                    ->icon('heroicon-m-user-circle')
                     ->placeholder('-'),
             ])
             ->filters([

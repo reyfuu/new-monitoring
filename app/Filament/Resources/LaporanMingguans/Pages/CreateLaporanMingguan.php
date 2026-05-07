@@ -27,12 +27,9 @@ class CreateLaporanMingguan extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $user = auth()->user();
-
-        if ($user->hasRole('mahasiswa')) {
-            $data['mahasiswa_id'] = $user->id;
-            $data['dosen'] = $user->dosen_pembimbing_id;
-            $data['status'] = 'pending';
+        // Model boot method handles mahasiswa_id and dosen_id
+        if (!isset($data['status'])) {
+            $data['status'] = 'review';
         }
 
         return $data;
