@@ -10,6 +10,9 @@
     @endif
 @endforeach
 
+<!-- Load comment styles (cacheable static file) -->
+<link rel="stylesheet" href="{{ asset('css/filament-comments.css') }}">
+
 <style>
     :root {
         @foreach ($cssVariables ?? [] as $cssVariableName => $cssVariableValue) --{{ $cssVariableName }}:{{ $cssVariableValue }}; @endforeach

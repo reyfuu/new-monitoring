@@ -105,14 +105,7 @@ class LaporanMingguanForm
                 ]);
         }
 
-        $components[] = Textarea::make('komentar')
-            ->label('Beri Feedback / Komentar Baru')
-            ->maxLength(255)
-            ->rows(3)
-            ->placeholder('Tulis feedback jika ada revisi atau catatan...')
-            ->dehydrated(true)
-            ->visible($user->hasAnyRole(['super_admin', 'dosen']))
-            ->columnSpanFull();
+        // komentar field intentionally removed from edit form per UX decision
 
         return $schema->components($components);
     }

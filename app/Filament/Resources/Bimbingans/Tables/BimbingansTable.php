@@ -186,54 +186,6 @@ class BimbingansTable
                     ]),
             ])
             ->recordActions([
-                Action::make('update_status')
-                    ->label('Update Status')
-                    ->icon('heroicon-o-pencil')
-                    ->color('primary')
-                    ->form([
-                        Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'review' => 'Review',
-                                'disetujui' => 'Disetujui',
-                                'revisi' => 'Revisi',
-                            ])
-                            ->required(),
-                        Textarea::make('komentar')
-                            ->label('Beri Komentar (Opsional)')
-                            ->rows(3)
-                            ->placeholder('Tulis feedback jika perlu...'),
-                    ])
-                    ->action(function ($record, array $data) {
-                                // minimal logging to avoid slowing down rendering
-                                // Log::info("BimbingansTable update_status Triggered", ['record_id' => $record->id]);
-                        $record->update([
-                            'status' => $data['status'],
-                            'komentar' => $data['komentar'],
-                        ]);
-
-                        if (!empty($data['komentar'])) {
-                            $record->comments()->create([
-                                'komentar' => $data['komentar'],
-                                'tanggal' => now(),
-                                'npm' => $record->mahasiswa?->npm,
-                                'dosen' => Auth::user()->name,
-                                'nidn' => Auth::user()->nidn,
-                                'user_id' => Auth::id(),
-                                'jenis' => 'Bimbingan',
-                            ]);
-
-                                // dispatch notifications (jobs handle heavy work)
-                                SendBimbinganStatusEmail::dispatch($record, $data['status'], $data['komentar']);
-                                SendBimbinganStatusTelegram::dispatch($record, $data['status'], $data['komentar']);
-                        } else {
-                            SendBimbinganStatusEmail::dispatch($record, $data['status'], null);
-                            SendBimbinganStatusTelegram::dispatch($record, $data['status'], null);
-                        }
-                    })
-                    ->visible(fn() => Auth::user()->hasRole('dosen'))
-                    ->modalHeading('Update Status Bimbingan')
-                    ->modalSubmitActionLabel('Simpan'),
             ])
             ->actions([
                 Action::make('komentar')
@@ -250,37 +202,38 @@ class BimbingansTable
                             ->getStateUsing(function ($record) {
                                 $comments = \App\Models\Comment::whereHas('bimbingan', function ($query) use ($record) {
                                     $query->where('user_id', $record->user_id);
-                                })->orderBy('tanggal', 'asc')->get();
+                                })->orderBy('tanggal', 'desc')->get();
 
                                 if ($comments->isEmpty()) {
                                     return new HtmlString('<div class="text-gray-500 italic">Belum ada komentar</div>');
                                 }
 
-                                $html = '<div class="space-y-4">';
+                                $html = '<div class="comment-list">';
 
                                 foreach ($comments as $comment) {
                                     // Determine role: prefer nidn (dosen) or npm (mahasiswa)
                                     $isDosen = !empty($comment->nidn);
                                     $name = $comment->dosen ?? $comment->nama ?? ($comment->user?->name ?? 'User');
-                                    $tanggal = $comment->tanggal ? $comment->tanggal->format('d M Y H:i') : '-';
+                                    $tanggal = $comment->tanggal ? $comment->tanggal->format('d M Y') : '-';
 
                                     $escapedComment = e($comment->komentar);
+                                    $shortLimit = 220;
+                                    $isLong = mb_strlen($comment->komentar) > $shortLimit;
+                                    $shortText = $isLong ? e(mb_substr($comment->komentar, 0, $shortLimit)) . '...' : $escapedComment;
+                                    $commentId = 'comment-' . $comment->id;
 
-                                    if ($isDosen) {
-                                        // Dosen message (left aligned, blue accent)
-                                        $html .= "<div class=\"flex\">";
-                                        $html .= "<div class=\"max-w-3xl w-full\">";
-                                        $html .= "<div class=\"text-sm text-sky-700 font-semibold mb-1\">Dosen: " . e($name) . " <span class=\"text-xs text-gray-400 font-normal ml-2\">{$tanggal}</span></div>";
-                                        $html .= "<div class=\"rounded-lg p-3 bg-sky-50 text-sm text-gray-800 border border-sky-100\">{$escapedComment}</div>";
-                                        $html .= "</div></div>";
-                                    } else {
-                                        // Mahasiswa message (right aligned, gray accent)
-                                        $html .= "<div class=\"flex justify-end\">";
-                                        $html .= "<div class=\"max-w-3xl w-full text-right\">";
-                                        $html .= "<div class=\"text-sm text-gray-700 font-semibold mb-1\">Mahasiswa: " . e($comment->npm ?? $name) . " <span class=\"text-xs text-gray-400 font-normal ml-2\">{$tanggal}</span></div>";
-                                        $html .= "<div class=\"rounded-lg p-3 bg-gray-100 text-sm text-gray-900 border border-gray-200 inline-block\">{$escapedComment}</div>";
-                                        $html .= "</div></div>";
+                                    // No avatar/icon and no bold name outside the box; render a cleaner box
+                                    // determine dosen name to show inside the box
+                                    $dosenName = $record->dosen?->name ?? $comment->dosen ?? '-';
+
+                                    $html .= "<div class=\"cm-box\">";
+                                    $html .= "<div class=\"cm-meta\">Bimbingan · Dosen: " . e($dosenName) . "</div>";
+                                    $html .= "<div class=\"cm-text\" id=\"{$commentId}-short\">{$shortText}</div>";
+                                    if ($isLong) {
+                                        $html .= "<div id=\"{$commentId}-full\" style=\"display:none\" class=\"cm-text\">{$escapedComment}</div>";
+                                        $html .= "<button type=\"button\" class=\"cm-toggle\" onclick=\"var s=document.getElementById('{$commentId}-short');var f=document.getElementById('{$commentId}-full');s.style.display=(s.style.display==='none')?'block':'none';f.style.display=(f.style.display==='none')?'block':'none';this.innerText = this.innerText.includes('Lihat') ? 'Tutup' : 'Lihat selengkapnya';\">Lihat selengkapnya</button>";
                                     }
+                                    $html .= "</div>";
                                 }
 
                                 $html .= '</div>';

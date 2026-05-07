@@ -85,6 +85,8 @@ class LaporanMingguansTable
                         default => $state ?? 'Review',
                     }),
 
+                // komentar_terakhir column removed per request
+
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->icon('heroicon-m-clock')
@@ -107,96 +109,9 @@ class LaporanMingguansTable
                     ->visible(fn() => Auth::user()->hasRole('mahasiswa')),
             ])
             ->actions([
-                Action::make('update_status')
-                    ->label('Update Status')
-                    ->icon('heroicon-o-pencil')
-                    ->color('primary')
-                    ->form([
-                        Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'review' => 'Review',
-                                'disetujui' => 'Disetujui',
-                                'revisi' => 'Revisi',
-                            ])
-                            ->required(),
-                        Textarea::make('komentar')
-                            ->label('Beri Komentar (Opsional)')
-                            ->rows(3)
-                            ->placeholder('Tulis feedback jika perlu...'),
-                    ])
-                    ->action(function ($record, array $data) {
-                        $record->update([
-                            'status' => $data['status'],
-                        ]);
-
-                        if (!empty($data['komentar'])) {
-                            $record->comments()->create([
-                                'komentar' => $data['komentar'],
-                                'tanggal' => now(),
-                                'npm' => $record->mahasiswa?->npm,
-                                'dosen' => Auth::user()->name,
-                                'nidn' => Auth::user()->nidn,
-                                'user_id' => Auth::id(),
-                                'jenis' => 'Laporan Mingguan',
-                            ]);
-                            
-                            // Kirim notifikasi dengan komentar
-                            SendLaporanMingguanStatusEmail::dispatch($record, $data['status'], $data['komentar']);
-                            SendLaporanMingguanStatusTelegram::dispatch($record, $data['status'], $data['komentar']);
-                        } else {
-                            // Kirim notifikasi tanpa komentar
-                            SendLaporanMingguanStatusEmail::dispatch($record, $data['status'], null);
-                            SendLaporanMingguanStatusTelegram::dispatch($record, $data['status'], null);
-                        }
-                    })
-                    ->visible(fn($record) => Auth::user()->hasRole('dosen'))
-                    ->modalHeading('Update Status Laporan')
-                    ->modalSubmitActionLabel('Simpan'),
-
                 EditAction::make()
-                    ->visible(fn() => Auth::user()->hasRole('mahasiswa')),
-
-                Action::make('komentar')
-                    ->label('Komentar')
-                    ->icon('heroicon-o-chat-bubble-left-ellipsis')
-                    ->color('info')
-                    ->modalHeading('Riwayat Komentar')
-                    ->modalSubmitAction(false)
-                    ->infolist(fn ($record) => [
-                        TextEntry::make('history_log')
-                            ->label('')
-                            ->html()
-                            ->default(' ')
-                            ->getStateUsing(function ($record) {
-                                // Get all comments for this student's laporans
-                                $comments = \App\Models\Comment::whereHas('laporanMingguan', function ($query) use ($record) {
-                                    $query->where('mahasiswa_id', $record->mahasiswa_id);
-                                })->latest()->get();
-
-                                if ($comments->isEmpty()) {
-                                    return new \Illuminate\Support\HtmlString('<div class="text-gray-500 italic">Belum ada komentar</div>');
-                                }
-
-                                $html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
-                                foreach ($comments as $comment) {
-                                    $html .= sprintf(
-                                        '<div style="border-left: 4px solid #3b82f6; padding-left: 1rem;">
-                                            <div style="font-weight: bold; font-size: 0.875rem;">%s (%s)</div>
-                                            <div style="font-size: 0.875rem; margin-top: 0.25rem;">%s</div>
-                                            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">%s</div>
-                                        </div>',
-                                        e($comment->dosen),
-                                        e($comment->nidn),
-                                        nl2br(e($comment->komentar)),
-                                        $comment->tanggal->format('d M Y H:i')
-                                    );
-                                }
-                                $html .= '</div>';
-
-                                return new \Illuminate\Support\HtmlString($html);
-                            })
-                    ]),
+                    ->label('Ubah')
+                    ->visible(fn() => Auth::user()->hasAnyRole(['mahasiswa', 'dosen', 'admin'])),
 
             ])
             ->bulkActions([

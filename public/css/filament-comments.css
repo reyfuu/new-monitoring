@@ -1,0 +1,19 @@
+.comment-list{display:flex;flex-direction:column;gap:1rem}
+.cm-box{margin-top:6px;border-radius:10px;padding:14px;font-size:0.95rem}
+.cm-meta{font-size:0.85rem;margin-bottom:8px}
+.cm-text{white-space:pre-wrap}
+.cm-toggle{font-size:0.85rem;margin-left:8px;margin-top:8px;background:none;border:none;padding:0;cursor:pointer}
+@media (prefers-color-scheme: dark) {
+  /* Dark mode: navy / slate aesthetic similar to the screenshot */
+  .cm-box{background:#0b1420;color:#e6eef8;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+  .cm-meta{color:rgba(230,238,248,0.65)}
+  .cm-name{color:#e6eef8}
+  .cm-toggle{color:#60a5fa}
+}
+@media (prefers-color-scheme: light) {
+  /* Light mode: soft card on white */
+  .cm-box{background:#ffffff;color:#0f1724;border:1px solid rgba(15,23,36,0.06);box-shadow:0 6px 18px rgba(15,23,36,0.04)}
+  .cm-meta{color:rgba(15,23,36,0.6)}
+  .cm-name{color:#0f1724}
+  .cm-toggle{color:#2563eb}
+}
