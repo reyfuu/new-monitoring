@@ -26,6 +26,7 @@ use App\Jobs\SendLaporanMingguanStatusTelegram;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 
+
 class BimbingansTable
 {
     public static function configure(Table $table): Table
@@ -207,37 +208,22 @@ class BimbingansTable
                                     return new HtmlString('<div class="text-gray-500 italic">Belum ada komentar</div>');
                                 }
 
-                                $html = '<div class="comment-list">';
-
+                                $html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
                                 foreach ($comments as $comment) {
-                                    // Determine role: prefer nidn (dosen) or npm (mahasiswa)
-                                    $isDosen = !empty($comment->nidn);
-                                    $name = $comment->dosen ?? $comment->nama ?? ($comment->user?->name ?? 'User');
                                     $tanggal = $comment->tanggal ? $comment->tanggal->format('d M Y') : '-';
-
-                                    $escapedComment = e($comment->komentar);
-                                    $shortLimit = 220;
-                                    $isLong = mb_strlen($comment->komentar) > $shortLimit;
-                                    $shortText = $isLong ? e(mb_substr($comment->komentar, 0, $shortLimit)) . '...' : $escapedComment;
-                                    $commentId = 'comment-' . $comment->id;
-
-                                    // No avatar/icon and no bold name outside the box; render a cleaner box
-                                    // determine dosen name to show inside the box
-                                    $dosenName = $record->dosen?->name ?? $comment->dosen ?? '-';
-
-                                    $html .= "<div class=\"cm-box\">";
-                                    $html .= "<div class=\"cm-meta\">Bimbingan · Dosen: " . e($dosenName) . "</div>";
-                                    $html .= "<div class=\"cm-text\" id=\"{$commentId}-short\">{$shortText}</div>";
-                                    if ($isLong) {
-                                        $html .= "<div id=\"{$commentId}-full\" style=\"display:none\" class=\"cm-text\">{$escapedComment}</div>";
-                                        $html .= "<button type=\"button\" class=\"cm-toggle\" onclick=\"var s=document.getElementById('{$commentId}-short');var f=document.getElementById('{$commentId}-full');s.style.display=(s.style.display==='none')?'block':'none';f.style.display=(f.style.display==='none')?'block':'none';this.innerText = this.innerText.includes('Lihat') ? 'Tutup' : 'Lihat selengkapnya';\">Lihat selengkapnya</button>";
-                                    }
-                                    $html .= "</div>";
+                                    $jenis = $comment->jenis ? "<span style='margin-right: 8px; padding: 2px 6px; border-radius: 4px; background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.75rem; font-weight: bold;'>{$comment->jenis}</span>" : "";
+                                    $html .= "
+                                        <div style='padding: 1rem; border: 1px solid rgba(128, 128, 128, 0.3); border-radius: 0.5rem;'>
+                                            <div style='display: flex; justify-content: space-between; margin-bottom: 0.5rem;'>
+                                                <span style='font-weight: bold;'>Dosen: {$comment->dosen}</span>
+                                                <span style='font-size: 0.875rem; opacity: 0.7; display: flex; align-items: center;'>{$jenis}{$tanggal}</span>
+                                            </div>
+                                            <div style='white-space: pre-wrap;'>{$comment->komentar}</div>
+                                        </div>";
                                 }
-
                                 $html .= '</div>';
-
-                                return new HtmlString($html);
+                                
+                                return new \Illuminate\Support\HtmlString($html);
                             }),
                     ]),
 
