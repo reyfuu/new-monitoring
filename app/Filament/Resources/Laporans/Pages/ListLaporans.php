@@ -14,9 +14,6 @@ class ListLaporans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('Tambah Laporan Baru')
-                ->visible(fn() => Auth::user()->hasRole('mahasiswa')),
         ];
     }
 }
