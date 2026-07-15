@@ -92,7 +92,6 @@ class UsersTable
                 // Kolom Dosen Pembimbing (Disembunyikan secara default)
                 TextColumn::make('dosenPembimbing.name')
                     ->label('Dosen Pembimbing')
-                    ->icon('heroicon-m-user-circle')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
