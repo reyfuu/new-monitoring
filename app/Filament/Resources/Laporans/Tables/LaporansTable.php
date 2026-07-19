@@ -51,7 +51,6 @@ class LaporansTable
             ->columns([
                 TextColumn::make('judul')
                     ->label('Judul')
-                    ->icon('heroicon-m-document-text')
                     ->limit(30)
                     ->tooltip(fn($record) => $record->judul)
                     ->searchable()
@@ -60,14 +59,12 @@ class LaporansTable
 
                 TextColumn::make('mahasiswa.name')
                     ->label('Mahasiswa')
-                    ->icon('heroicon-m-user')
                     ->disabled(fn() => auth()->user()?->hasRole('dosen'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('dosen.name')
                     ->label('Dosen Pembimbing')
-                    ->icon('heroicon-m-user-circle')
                     ->searchable()
                     ->sortable(),
 
@@ -91,29 +88,10 @@ class LaporansTable
 
                 TextColumn::make('status')
                     ->label('Status')
-                    ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'review' => 'warning',
-                        'disetujui' => 'success',
-                        'revisi' => 'danger',
-                        default => 'secondary',
-                    })
-                    ->icon(fn (?string $state): string => match ($state) {
-                        'review' => 'heroicon-m-clock',
-                        'disetujui' => 'heroicon-m-check-circle',
-                        'revisi' => 'heroicon-m-exclamation-triangle',
-                        default => 'heroicon-m-question-mark-circle',
-                    })
-                    ->formatStateUsing(fn($state) => match ($state) {
-                        'review' => 'Review',
-                        'disetujui' => 'Disetujui',
-                        'revisi' => 'Revisi',
-                        default => $state ?? 'Review',
-                    }),
+                    ->view('filament.tables.columns.status-badge'),
 
                 TextColumn::make('tanggal_mulai')
                     ->label('Mulai')
-                    ->icon('heroicon-m-calendar')
                     ->date('d M Y')
                     ->sortable()
                     ->toggleable(),

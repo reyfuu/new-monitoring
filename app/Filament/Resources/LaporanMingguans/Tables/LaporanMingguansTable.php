@@ -45,10 +45,7 @@ class LaporanMingguansTable
                 TextColumn::make('week')
                     ->label('Minggu Ke')
                     ->sortable()
-                    ->badge()
-                    ->icon('heroicon-m-calendar')
-                    ->color('primary')
-                    ->formatStateUsing(fn($state) => "Minggu {$state}"),
+                    ->view('filament.tables.columns.badge-minggu'),
 
                 TextColumn::make('isi')
                     ->label('Isi / Link')
@@ -65,25 +62,7 @@ class LaporanMingguansTable
 
                 TextColumn::make('status')
                     ->label('Status')
-                    ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'review' => 'warning',
-                        'disetujui' => 'success',
-                        'revisi' => 'danger',
-                        default => 'secondary',
-                    })
-                    ->icon(fn (?string $state): string => match ($state) {
-                        'review' => 'heroicon-m-clock',
-                        'disetujui' => 'heroicon-m-check-circle',
-                        'revisi' => 'heroicon-m-exclamation-triangle',
-                        default => 'heroicon-m-question-mark-circle',
-                    })
-                    ->formatStateUsing(fn($state) => match ($state) {
-                        'review' => 'Review',
-                        'disetujui' => 'Disetujui',
-                        'revisi' => 'Revisi',
-                        default => $state ?? 'Review',
-                    }),
+                    ->view('filament.tables.columns.status-badge'),
 
                 // komentar_terakhir column removed per request
 

@@ -61,10 +61,7 @@ class BimbingansTable
             ->columns([
                 TextColumn::make('pertemuan_ke')
                     ->label('Pertemuan')
-                    ->badge()
-                    ->color('success')
-                    ->icon('heroicon-m-hashtag')
-                    ->formatStateUsing(fn($state) => $state ? "Ke-{$state}" : 'N/A')
+                    ->view('filament.tables.columns.badge-pertemuan')
                     ->sortable()
                     ->getStateUsing(function ($record) {
                         // faster: count how many records up to this tanggal for the same user
@@ -75,7 +72,6 @@ class BimbingansTable
 
                 TextColumn::make('mahasiswa.name')
                     ->label('Mahasiswa')
-                    ->icon('heroicon-m-user')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -83,7 +79,6 @@ class BimbingansTable
 
                 TextColumn::make('dosen.name')
                     ->label('Dosen')
-                    ->icon('heroicon-m-user-circle')
                     ->searchable()
                     ->sortable()
                     ->placeholder('Belum ada dosen')
@@ -91,7 +86,6 @@ class BimbingansTable
 
                 TextColumn::make('topik')
                     ->label('Topik Pertemuan')
-                    ->icon('heroicon-m-chat-bubble-bottom-center-text')
                     ->searchable()
                     ->limit(40)
                     ->tooltip(function (TextColumn $column): ?string {
@@ -102,7 +96,6 @@ class BimbingansTable
 
                 TextColumn::make('tanggal')
                     ->label('Tanggal')
-                    ->icon('heroicon-m-calendar')
                     ->date('d M Y')
                     ->sortable(),
 
@@ -114,25 +107,7 @@ class BimbingansTable
 
                 TextColumn::make('status')
                     ->label('Status')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'review' => 'warning',
-                        'disetujui' => 'success',
-                        'revisi' => 'danger',
-                        default => 'gray',
-                    })
-                    ->icon(fn(string $state): string => match ($state) {
-                        'review' => 'heroicon-m-clock',
-                        'disetujui' => 'heroicon-m-check-circle',
-                        'revisi' => 'heroicon-m-exclamation-triangle',
-                        default => 'heroicon-m-question-mark-circle',
-                    })
-                    ->formatStateUsing(fn($state) => match ($state) {
-                        'review' => 'Review',
-                        'disetujui' => 'Disetujui',
-                        'revisi' => 'Revisi',
-                        default => ucfirst($state),
-                    }),
+                    ->view('filament.tables.columns.status-badge'),
 
                 TextColumn::make('revision_count')
                     ->label('Revisi Ke-')
