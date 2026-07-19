@@ -14,10 +14,6 @@ class ListBimbingans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-<<<<<<< HEAD
-=======
-        
->>>>>>> 9568dbdc6a1b8b9015ca3ca03f491d90b5433dd8
         ];
     }
 }
