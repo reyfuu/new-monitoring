@@ -10,7 +10,6 @@ class CreateBimbingan extends CreateRecord
 {
     protected static string $resource = BimbinganResource::class;
 
-    protected static ?string $title = 'Buat Bimbingan';
 
     protected static ?string $breadcrumb = 'Buat';
 

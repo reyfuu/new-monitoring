@@ -68,18 +68,18 @@ class BimbinganResource extends Resource
             });
     }
 
-    public static function canCreate(): bool
-    {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
+    // public static function canCreate(): bool
+    // {
+    //     /** @var \App\Models\User|null $user */
+    //     $user = Auth::user();
 
-        if (! $user) {
-            return false;
-        }
+    //     if (! $user) {
+    //         return false;
+    //     }
 
-        // Hanya mahasiswa dan super_admin yang bisa membuat bimbingan
-        return $user->hasRole('mahasiswa') || $user->hasRole('super_admin');
-    }
+    //     // Hanya mahasiswa dan super_admin yang bisa membuat bimbingan
+    //     return $user->hasRole('mahasiswa') || $user->hasRole('super_admin');
+    // }
 
     public static function shouldRegisterNavigation(): bool
     {

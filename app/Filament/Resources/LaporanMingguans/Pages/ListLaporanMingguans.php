@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\LaporanMingguans\Pages;
 
 use App\Filament\Resources\LaporanMingguans\LaporanMingguanResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,9 +13,6 @@ class ListLaporanMingguans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('Buat Laporan Mingguan')
-                ->visible(fn() => Auth::user()->hasRole('mahasiswa')),
         ];
     }
 }
